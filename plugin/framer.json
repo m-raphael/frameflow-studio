@@ -1,0 +1,8 @@
+{
+  "id": "a18ba8",
+  "name": "Plugin",
+  "modes": [
+    "canvas"
+  ],
+  "icon": "/icon.svg"
+}
