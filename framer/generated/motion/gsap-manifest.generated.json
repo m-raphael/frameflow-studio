@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-04-09T08:15:04.528Z",
+  "components": [
+    {
+      "id": "hero-title-reveal",
+      "suggestedPattern": "ScrollTrigger timeline component",
+      "reason": "Scroll-linked interactions with scrub or pin are better handled with GSAP timelines and ScrollTrigger."
+    }
+  ]
+}
