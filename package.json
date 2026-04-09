@@ -1,0 +1,7 @@
+{
+  "name": "frameflow",
+  "private": true,
+  "scripts": {
+    "build:tokens": "node orchestrator/scripts/build-tokens.mjs"
+  }
+}
