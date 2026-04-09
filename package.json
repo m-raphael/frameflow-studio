@@ -4,6 +4,7 @@
   "scripts": {
     "build:tokens": "node orchestrator/scripts/build-tokens.mjs",
     "build:site": "node orchestrator/scripts/build-site-map.mjs",
-    "build:motion": "node orchestrator/scripts/build-motion.mjs"
+    "build:motion": "node orchestrator/scripts/build-motion.mjs",
+    "build:motion-files": "node orchestrator/scripts/build-motion-files.mjs"
   }
 }
