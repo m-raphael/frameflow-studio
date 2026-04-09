@@ -1,0 +1,37 @@
+{
+  "siteName": "Editorial Portfolio",
+  "referenceType": "url",
+  "pages": [
+    {
+      "id": "home",
+      "path": "/",
+      "title": "Editorial Home",
+      "sections": [
+        {
+          "id": "hero",
+          "kind": "hero",
+          "layout": "oversized editorial headline with restrained intro motion",
+          "notes": "Display typography first, image secondary"
+        },
+        {
+          "id": "manifesto",
+          "kind": "story",
+          "layout": "single-column reading width with scroll reveals",
+          "notes": "Reading comfort and rhythm matter"
+        },
+        {
+          "id": "features",
+          "kind": "feature-grid",
+          "layout": "asymmetric editorial grid",
+          "notes": "Avoid generic 3-column SaaS layout"
+        },
+        {
+          "id": "footer",
+          "kind": "footer",
+          "layout": "minimal outro",
+          "notes": "Quiet finish"
+        }
+      ]
+    }
+  ]
+}

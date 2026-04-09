@@ -1,0 +1,37 @@
+{
+  "siteName": "Creative Agency",
+  "referenceType": "url",
+  "pages": [
+    {
+      "id": "home",
+      "path": "/",
+      "title": "Agency Home",
+      "sections": [
+        {
+          "id": "hero",
+          "kind": "hero",
+          "layout": "cinematic intro with large statement text",
+          "notes": "Should feel sharp, premium, energetic"
+        },
+        {
+          "id": "selected-work",
+          "kind": "gallery",
+          "layout": "stacked project cards with hover depth",
+          "notes": "Visuals dominate, copy stays concise"
+        },
+        {
+          "id": "studio-story",
+          "kind": "story",
+          "layout": "alternating text and media rhythm",
+          "notes": "Motion supports narrative pacing"
+        },
+        {
+          "id": "footer",
+          "kind": "footer",
+          "layout": "strong CTA outro",
+          "notes": "One clear action"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "siteName": "Product Landing",
+  "referenceType": "url",
+  "pages": [
+    {
+      "id": "home",
+      "path": "/",
+      "title": "Product Home",
+      "sections": [
+        {
+          "id": "hero",
+          "kind": "hero",
+          "layout": "headline plus product frame",
+          "notes": "Clarity first, then motion polish"
+        },
+        {
+          "id": "benefits",
+          "kind": "feature-grid",
+          "layout": "modular card system with varied spans",
+          "notes": "Keep density balanced"
+        },
+        {
+          "id": "proof",
+          "kind": "case-study",
+          "layout": "evidence and examples",
+          "notes": "Supports conversion"
+        },
+        {
+          "id": "footer",
+          "kind": "footer",
+          "layout": "simple conversion close",
+          "notes": "No extra noise"
+        }
+      ]
+    }
+  ]
+}
