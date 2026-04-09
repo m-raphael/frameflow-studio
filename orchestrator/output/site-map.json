@@ -1,0 +1,37 @@
+{
+  "siteName": "Waaark-inspired Studio",
+  "referenceType": "url",
+  "pages": [
+    {
+      "id": "home",
+      "path": "/",
+      "title": "Home",
+      "sections": [
+        {
+          "id": "hero",
+          "kind": "hero",
+          "layout": "full-height centered headline with layered intro motion",
+          "notes": "Large display text, dark stage, immediate kinetic impact"
+        },
+        {
+          "id": "intro-story",
+          "kind": "story",
+          "layout": "stacked editorial blocks with scroll-linked transitions",
+          "notes": "Section rhythm matters more than dense content"
+        },
+        {
+          "id": "selected-work",
+          "kind": "gallery",
+          "layout": "tall visual cards with cinematic spacing",
+          "notes": "Hover states should feel premium and subtle"
+        },
+        {
+          "id": "footer",
+          "kind": "footer",
+          "layout": "minimal outro with strong typography",
+          "notes": "Simple but intentional close"
+        }
+      ]
+    }
+  ]
+}
