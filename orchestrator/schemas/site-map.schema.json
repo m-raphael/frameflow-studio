@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SiteMap",
+  "type": "object",
+  "properties": {
+    "siteName": { "type": "string" },
+    "referenceType": {
+      "type": "string",
+      "enum": ["url", "screenshot", "video", "mixed"]
+    },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "title": { "type": "string" },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "hero",
+                    "intro",
+                    "gallery",
+                    "story",
+                    "feature-grid",
+                    "case-study",
+                    "footer",
+                    "custom"
+                  ]
+                },
+                "layout": { "type": "string" },
+                "notes": { "type": "string" }
+              },
+              "required": ["id", "kind"]
+            }
+          }
+        },
+        "required": ["id", "title", "sections"]
+      }
+    }
+  },
+  "required": ["siteName", "referenceType", "pages"]
+}
