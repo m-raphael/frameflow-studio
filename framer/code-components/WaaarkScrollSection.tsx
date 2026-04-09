@@ -7,7 +7,9 @@ gsap.registerPlugin(ScrollTrigger)
 
 type Props = {
   title: string
-  height: number
+  sectionHeight: number
+  background: string
+  textColor: string
 }
 
 export default function WaaarkScrollSection(props: Props) {
@@ -17,13 +19,19 @@ export default function WaaarkScrollSection(props: Props) {
   React.useLayoutEffect(() => {
     if (!rootRef.current || !titleRef.current) return
 
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (prefersReducedMotion) {
+      gsap.set(titleRef.current, { opacity: 1, y: 0 })
+      return
+    }
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         titleRef.current,
-        { y: 80, opacity: 0 },
+        { opacity: 0, y: 96 },
         {
-          y: 0,
           opacity: 1,
+          y: 0,
           ease: "power3.out",
           scrollTrigger: {
             trigger: rootRef.current,
@@ -42,20 +50,53 @@ export default function WaaarkScrollSection(props: Props) {
     <section
       ref={rootRef}
       style={{
-        height: props.height,
+        height: props.sectionHeight,
+        width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        width: "100%"
+        background: props.background,
+        color: props.textColor
       }}
     >
-      <h1 ref={titleRef} style={{ margin: 0 }}>{props.title}</h1>
+      <h1
+        ref={titleRef}
+        style={{
+          margin: 0,
+          fontSize: "clamp(48px, 10vw, 140px)",
+          lineHeight: 0.95,
+          letterSpacing: "-0.05em"
+        }}
+      >
+        {props.title}
+      </h1>
     </section>
   )
 }
 
 addPropertyControls(WaaarkScrollSection, {
-  title: { type: ControlType.String, title: "Title", defaultValue: "Studio" },
-  height: { type: ControlType.Number, title: "Height", defaultValue: 1200, min: 400, max: 2400, unit: "px" }
+  title: {
+    type: ControlType.String,
+    title: "Title",
+    defaultValue: "Frameflow"
+  },
+  sectionHeight: {
+    type: ControlType.Number,
+    title: "Height",
+    defaultValue: 1200,
+    min: 480,
+    max: 2400,
+    unit: "px"
+  },
+  background: {
+    type: ControlType.Color,
+    title: "Background",
+    defaultValue: "#0B0B0B"
+  },
+  textColor: {
+    type: ControlType.Color,
+    title: "Text",
+    defaultValue: "#F5F5F0"
+  }
 })

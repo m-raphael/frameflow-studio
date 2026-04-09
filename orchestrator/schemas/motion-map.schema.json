@@ -4,10 +4,6 @@
   "type": "object",
   "properties": {
     "page": { "type": "string" },
-    "breakpoints": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
     "interactions": {
       "type": "array",
       "items": {
@@ -26,7 +22,6 @@
           "pin": { "type": "boolean" },
           "duration": { "type": "number" },
           "ease": { "type": "string" },
-          "props": { "type": "object" },
           "mobileFallback": { "type": "string" }
         },
         "required": ["id", "kind", "target", "trigger"]

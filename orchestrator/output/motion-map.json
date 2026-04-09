@@ -1,0 +1,18 @@
+{
+  "page": "home",
+  "interactions": [
+    {
+      "id": "hero-title-reveal",
+      "kind": "scroll",
+      "target": "heroTitle",
+      "trigger": "heroSection",
+      "start": "top 80%",
+      "end": "top 20%",
+      "scrub": 1,
+      "pin": false,
+      "duration": 1.2,
+      "ease": "power3.out",
+      "mobileFallback": "fade"
+    }
+  ]
+}
