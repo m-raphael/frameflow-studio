@@ -1,0 +1,5 @@
+{
+  "id": "frameflow-plugin",
+  "name": "Frameflow",
+  "main": "src/main.tsx"
+}

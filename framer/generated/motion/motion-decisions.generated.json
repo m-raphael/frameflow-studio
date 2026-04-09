@@ -1,6 +1,6 @@
 {
   "source": "orchestrator/output/motion-map.json",
-  "generatedAt": "2026-04-09T08:15:04.526Z",
+  "generatedAt": "2026-04-09T08:42:38.002Z",
   "interactions": [
     {
       "id": "hero-title-reveal",

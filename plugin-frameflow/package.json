@@ -1,0 +1,14 @@
+{
+  "name": "plugin-frameflow",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "framer-plugin dev",
+    "build": "framer-plugin build"
+  },
+  "dependencies": {
+    "framer-plugin": "latest",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
