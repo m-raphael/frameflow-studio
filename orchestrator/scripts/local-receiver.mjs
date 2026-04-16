@@ -8,6 +8,12 @@ const port = 4317
 const requestPath = path.join(root, "orchestrator", "input", "reference-request.json")
 
 let childProcess = null
+let artifacts = {
+  sections: [],
+  motion: [],
+  reports: []
+}
+
 let state = {
   status: "idle",
   message: "Receiver ready",
@@ -24,6 +30,33 @@ const sendJson = (res, statusCode, payload, origin = "*") => {
     "Access-Control-Allow-Headers": "Content-Type"
   })
   res.end(JSON.stringify(payload))
+}
+
+const safeReadJson = (relativePath) => {
+  const absolutePath = path.join(root, relativePath)
+  if (!fs.existsSync(absolutePath)) return null
+  try {
+    return JSON.parse(fs.readFileSync(absolutePath, "utf8"))
+  } catch {
+    return null
+  }
+}
+
+const collectArtifacts = () => {
+  const sectionManifest = safeReadJson("framer/generated/sections/_manifest.json")
+  const motionDecisions = safeReadJson("framer/generated/motion/motion-decisions.generated.json")
+
+  artifacts = {
+    sections: sectionManifest?.files || [],
+    motion: motionDecisions?.interactions?.map((item) => ({
+      id: item.id,
+      implementation: item.implementation
+    })) || [],
+    reports: [
+      "docs/build-summary.md",
+      "docs/motion-build-report.md"
+    ].filter((file) => fs.existsSync(path.join(root, file)))
+  }
 }
 
 const launchPipeline = () => {
@@ -45,6 +78,7 @@ const launchPipeline = () => {
 
   childProcess.on("exit", (code) => {
     if (code === 0) {
+      collectArtifacts()
       state.status = "success"
       state.message = "Pipeline completed successfully"
       state.lastCompletedAt = new Date().toISOString()
@@ -74,6 +108,15 @@ const server = http.createServer((req, res) => {
     sendJson(res, 200, {
       ok: true,
       ...state
+    }, origin)
+    return
+  }
+
+  if (req.method === "GET" && req.url === "/artifacts") {
+    sendJson(res, 200, {
+      ok: true,
+      status: state.status,
+      artifacts
     }, origin)
     return
   }

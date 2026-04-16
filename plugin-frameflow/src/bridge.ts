@@ -21,6 +21,16 @@ export type ReceiverStatus = {
   lastErrorAt: string | null
 }
 
+export type ReceiverArtifacts = {
+  ok?: boolean
+  status: string
+  artifacts: {
+    sections: string[]
+    motion: { id: string; implementation: string }[]
+    reports: string[]
+  }
+}
+
 export async function copyRequestToClipboard(request: ReferenceRequest) {
   await navigator.clipboard.writeText(JSON.stringify(request, null, 2))
   return request
@@ -46,6 +56,14 @@ export async function fetchReceiverStatus(): Promise<ReceiverStatus> {
   const response = await fetch("http://127.0.0.1:4317/status")
   if (!response.ok) {
     throw new Error(`Status error: ${response.status}`)
+  }
+  return response.json()
+}
+
+export async function fetchReceiverArtifacts(): Promise<ReceiverArtifacts> {
+  const response = await fetch("http://127.0.0.1:4317/artifacts")
+  if (!response.ok) {
+    throw new Error(`Artifacts error: ${response.status}`)
   }
   return response.json()
 }

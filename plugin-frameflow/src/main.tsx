@@ -3,8 +3,10 @@ import { useEffect, useMemo, useState } from "react"
 import { createRoot } from "react-dom/client"
 import {
   copyRequestToClipboard,
+  fetchReceiverArtifacts,
   fetchReceiverStatus,
   sendRequestToLocalReceiver,
+  type ReceiverArtifacts,
   type ReceiverStatus,
   type ReferenceRequest,
   type Provider
@@ -12,8 +14,8 @@ import {
 
 framer.showUI({
   position: "top right",
-  width: 400,
-  height: 780
+  width: 420,
+  height: 860
 })
 
 function App() {
@@ -25,6 +27,7 @@ function App() {
   const [notes, setNotes] = useState("")
   const [status, setStatus] = useState("Idle")
   const [receiverStatus, setReceiverStatus] = useState<ReceiverStatus | null>(null)
+  const [receiverArtifacts, setReceiverArtifacts] = useState<ReceiverArtifacts | null>(null)
 
   const providerHint = useMemo(() => {
     if (provider === "claude-subscription") {
@@ -38,8 +41,13 @@ function App() {
 
     const poll = async () => {
       try {
-        const next = await fetchReceiverStatus()
-        if (!cancelled) setReceiverStatus(next)
+        const nextStatus = await fetchReceiverStatus()
+        if (!cancelled) setReceiverStatus(nextStatus)
+
+        if (nextStatus.status === "success") {
+          const nextArtifacts = await fetchReceiverArtifacts()
+          if (!cancelled) setReceiverArtifacts(nextArtifacts)
+        }
       } catch {
         if (!cancelled) {
           setReceiverStatus({
@@ -218,7 +226,7 @@ function App() {
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          rows={6}
+          rows={5}
           placeholder="Micro-interactions, scroll behavior, cursor intent, asset replacement rules..."
           style={{
             padding: 10,
@@ -263,6 +271,54 @@ function App() {
       </div>
 
       <div style={{ fontSize: 12, opacity: 0.7 }}>{status}</div>
+
+      {receiverArtifacts?.artifacts && (
+        <div
+          style={{
+            marginTop: 4,
+            padding: 12,
+            borderRadius: 12,
+            background: "rgba(0,0,0,0.03)",
+            border: "1px solid rgba(0,0,0,0.08)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 10
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700 }}>Generated artifacts</div>
+
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Sections</div>
+            <div style={{ fontSize: 12, opacity: 0.78 }}>
+              {receiverArtifacts.artifacts.sections.length
+                ? receiverArtifacts.artifacts.sections.map((item) => <div key={item}>{item}</div>)
+                : "No sections found"}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Motion</div>
+            <div style={{ fontSize: 12, opacity: 0.78 }}>
+              {receiverArtifacts.artifacts.motion.length
+                ? receiverArtifacts.artifacts.motion.map((item) => (
+                    <div key={item.id}>
+                      {item.id} — {item.implementation}
+                    </div>
+                  ))
+                : "No motion artifacts found"}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Reports</div>
+            <div style={{ fontSize: 12, opacity: 0.78 }}>
+              {receiverArtifacts.artifacts.reports.length
+                ? receiverArtifacts.artifacts.reports.map((item) => <div key={item}>{item}</div>)
+                : "No reports found"}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
