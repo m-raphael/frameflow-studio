@@ -59,6 +59,19 @@ const collectArtifacts = () => {
   }
 }
 
+const isAllowedReadPath = (requestedFile) => {
+  const normalized = path.normalize(requestedFile).replace(/^(\.\.(\/|\\|$))+/, "")
+  const allowedPrefixes = [
+    "docs/",
+    "framer/generated/",
+    "orchestrator/output/"
+  ]
+  return {
+    normalized,
+    allowed: allowedPrefixes.some((prefix) => normalized.startsWith(prefix))
+  }
+}
+
 const launchPipeline = () => {
   if (childProcess) {
     state.status = "running"
@@ -93,6 +106,7 @@ const launchPipeline = () => {
 
 const server = http.createServer((req, res) => {
   const origin = req.headers.origin || "*"
+  const url = new URL(req.url, `http://127.0.0.1:${port}`)
 
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
@@ -104,7 +118,7 @@ const server = http.createServer((req, res) => {
     return
   }
 
-  if (req.method === "GET" && req.url === "/status") {
+  if (req.method === "GET" && url.pathname === "/status") {
     sendJson(res, 200, {
       ok: true,
       ...state
@@ -112,7 +126,7 @@ const server = http.createServer((req, res) => {
     return
   }
 
-  if (req.method === "GET" && req.url === "/artifacts") {
+  if (req.method === "GET" && url.pathname === "/artifacts") {
     sendJson(res, 200, {
       ok: true,
       status: state.status,
@@ -121,7 +135,38 @@ const server = http.createServer((req, res) => {
     return
   }
 
-  if (req.method === "POST" && req.url === "/request") {
+  if (req.method === "GET" && url.pathname === "/read") {
+    const file = url.searchParams.get("file") || ""
+    const { normalized, allowed } = isAllowedReadPath(file)
+
+    if (!allowed) {
+      sendJson(res, 403, {
+        ok: false,
+        message: "File path not allowed"
+      }, origin)
+      return
+    }
+
+    const absolutePath = path.join(root, normalized)
+
+    if (!fs.existsSync(absolutePath)) {
+      sendJson(res, 404, {
+        ok: false,
+        message: "File not found"
+      }, origin)
+      return
+    }
+
+    const content = fs.readFileSync(absolutePath, "utf8")
+    sendJson(res, 200, {
+      ok: true,
+      file: normalized,
+      content
+    }, origin)
+    return
+  }
+
+  if (req.method === "POST" && url.pathname === "/request") {
     let body = ""
 
     req.on("data", (chunk) => {

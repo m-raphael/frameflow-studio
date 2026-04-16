@@ -31,6 +31,12 @@ export type ReceiverArtifacts = {
   }
 }
 
+export type ReadResponse = {
+  ok?: boolean
+  file: string
+  content: string
+}
+
 export async function copyRequestToClipboard(request: ReferenceRequest) {
   await navigator.clipboard.writeText(JSON.stringify(request, null, 2))
   return request
@@ -64,6 +70,17 @@ export async function fetchReceiverArtifacts(): Promise<ReceiverArtifacts> {
   const response = await fetch("http://127.0.0.1:4317/artifacts")
   if (!response.ok) {
     throw new Error(`Artifacts error: ${response.status}`)
+  }
+  return response.json()
+}
+
+export async function readGeneratedFile(file: string): Promise<ReadResponse> {
+  const url = new URL("http://127.0.0.1:4317/read")
+  url.searchParams.set("file", file)
+
+  const response = await fetch(url.toString())
+  if (!response.ok) {
+    throw new Error(`Read error: ${response.status}`)
   }
   return response.json()
 }

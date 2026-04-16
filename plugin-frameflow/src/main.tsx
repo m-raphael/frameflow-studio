@@ -5,6 +5,7 @@ import {
   copyRequestToClipboard,
   fetchReceiverArtifacts,
   fetchReceiverStatus,
+  readGeneratedFile,
   sendRequestToLocalReceiver,
   type ReceiverArtifacts,
   type ReceiverStatus,
@@ -14,8 +15,8 @@ import {
 
 framer.showUI({
   position: "top right",
-  width: 420,
-  height: 860
+  width: 440,
+  height: 920
 })
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
   const [status, setStatus] = useState("Idle")
   const [receiverStatus, setReceiverStatus] = useState<ReceiverStatus | null>(null)
   const [receiverArtifacts, setReceiverArtifacts] = useState<ReceiverArtifacts | null>(null)
+  const [previewTitle, setPreviewTitle] = useState("")
+  const [previewContent, setPreviewContent] = useState("")
 
   const providerHint = useMemo(() => {
     if (provider === "claude-subscription") {
@@ -98,6 +101,18 @@ function App() {
       setStatus("Request sent.")
     } catch {
       setStatus("Could not reach local receiver at 127.0.0.1:4317")
+    }
+  }
+
+  async function handleRead(file: string) {
+    setStatus(`Reading ${file}…`)
+    try {
+      const result = await readGeneratedFile(file)
+      setPreviewTitle(result.file)
+      setPreviewContent(result.content)
+      setStatus("Preview loaded.")
+    } catch {
+      setStatus(`Could not read ${file}`)
     }
   }
 
@@ -226,7 +241,7 @@ function App() {
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          rows={5}
+          rows={4}
           placeholder="Micro-interactions, scroll behavior, cursor intent, asset replacement rules..."
           style={{
             padding: 10,
@@ -288,8 +303,33 @@ function App() {
           <div style={{ fontSize: 13, fontWeight: 700 }}>Generated artifacts</div>
 
           <div>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Reports</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {receiverArtifacts.artifacts.reports.length
+                ? receiverArtifacts.artifacts.reports.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => handleRead(item)}
+                      style={{
+                        textAlign: "left",
+                        padding: "8px 10px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(0,0,0,0.08)",
+                        background: "#fff",
+                        cursor: "pointer",
+                        fontSize: 12
+                      }}
+                    >
+                      {item}
+                    </button>
+                  ))
+                : <div style={{ fontSize: 12, opacity: 0.78 }}>No reports found</div>}
+            </div>
+          </div>
+
+          <div>
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Sections</div>
-            <div style={{ fontSize: 12, opacity: 0.78 }}>
+            <div style={{ fontSize: 12, opacity: 0.78, maxHeight: 100, overflow: "auto" }}>
               {receiverArtifacts.artifacts.sections.length
                 ? receiverArtifacts.artifacts.sections.map((item) => <div key={item}>{item}</div>)
                 : "No sections found"}
@@ -298,7 +338,7 @@ function App() {
 
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Motion</div>
-            <div style={{ fontSize: 12, opacity: 0.78 }}>
+            <div style={{ fontSize: 12, opacity: 0.78, maxHeight: 100, overflow: "auto" }}>
               {receiverArtifacts.artifacts.motion.length
                 ? receiverArtifacts.artifacts.motion.map((item) => (
                     <div key={item.id}>
@@ -308,15 +348,39 @@ function App() {
                 : "No motion artifacts found"}
             </div>
           </div>
+        </div>
+      )}
 
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Reports</div>
-            <div style={{ fontSize: 12, opacity: 0.78 }}>
-              {receiverArtifacts.artifacts.reports.length
-                ? receiverArtifacts.artifacts.reports.map((item) => <div key={item}>{item}</div>)
-                : "No reports found"}
-            </div>
-          </div>
+      {previewContent && (
+        <div
+          style={{
+            marginTop: 4,
+            padding: 12,
+            borderRadius: 12,
+            background: "#ffffff",
+            border: "1px solid rgba(0,0,0,0.08)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700 }}>{previewTitle}</div>
+          <pre
+            style={{
+              margin: 0,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              fontSize: 12,
+              lineHeight: 1.45,
+              maxHeight: 240,
+              overflow: "auto",
+              background: "rgba(0,0,0,0.03)",
+              padding: 10,
+              borderRadius: 10
+            }}
+          >
+            {previewContent}
+          </pre>
         </div>
       )}
     </main>
