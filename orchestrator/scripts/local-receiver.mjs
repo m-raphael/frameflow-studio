@@ -7,30 +7,53 @@ const root = process.cwd()
 const port = 4317
 const requestPath = path.join(root, "orchestrator", "input", "reference-request.json")
 
-let running = false
+let childProcess = null
+let state = {
+  status: "idle",
+  message: "Receiver ready",
+  lastRequestAt: null,
+  lastCompletedAt: null,
+  lastErrorAt: null
+}
 
-const sendJson = (res, status, payload, origin = "*") => {
-  res.writeHead(status, {
+const sendJson = (res, statusCode, payload, origin = "*") => {
+  res.writeHead(statusCode, {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
   })
   res.end(JSON.stringify(payload))
 }
 
 const launchPipeline = () => {
-  if (running) return
-  running = true
+  if (childProcess) {
+    state.status = "running"
+    state.message = "Pipeline already running"
+    return
+  }
 
-  const child = spawn("npm", ["run", "launch:frameflow"], {
+  state.status = "running"
+  state.message = "Pipeline running"
+  state.lastRequestAt = new Date().toISOString()
+
+  childProcess = spawn("npm", ["run", "launch:frameflow"], {
     cwd: root,
     stdio: "inherit",
     shell: true
   })
 
-  child.on("exit", () => {
-    running = false
+  childProcess.on("exit", (code) => {
+    if (code === 0) {
+      state.status = "success"
+      state.message = "Pipeline completed successfully"
+      state.lastCompletedAt = new Date().toISOString()
+    } else {
+      state.status = "failed"
+      state.message = `Pipeline failed with code ${code}`
+      state.lastErrorAt = new Date().toISOString()
+    }
+    childProcess = null
   })
 }
 
@@ -40,10 +63,18 @@ const server = http.createServer((req, res) => {
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     })
     res.end()
+    return
+  }
+
+  if (req.method === "GET" && req.url === "/status") {
+    sendJson(res, 200, {
+      ok: true,
+      ...state
+    }, origin)
     return
   }
 
@@ -60,27 +91,28 @@ const server = http.createServer((req, res) => {
         fs.mkdirSync(path.dirname(requestPath), { recursive: true })
         fs.writeFileSync(requestPath, JSON.stringify(payload, null, 2) + "\n", "utf8")
 
-        launchPipeline()
+        if (childProcess) {
+          state.status = "queued"
+          state.message = "Request received, waiting for current pipeline run to finish"
+          state.lastRequestAt = new Date().toISOString()
+          sendJson(res, 202, { ok: true, ...state }, origin)
+          return
+        }
 
-        sendJson(res, 200, {
-          ok: true,
-          message: "Request received and pipeline launched"
-        }, origin)
-      } catch (error) {
-        sendJson(res, 400, {
-          ok: false,
-          message: "Invalid JSON payload"
-        }, origin)
+        launchPipeline()
+        sendJson(res, 200, { ok: true, ...state }, origin)
+      } catch {
+        state.status = "failed"
+        state.message = "Invalid JSON payload"
+        state.lastErrorAt = new Date().toISOString()
+        sendJson(res, 400, { ok: false, ...state }, origin)
       }
     })
 
     return
   }
 
-  sendJson(res, 404, {
-    ok: false,
-    message: "Not found"
-  }, origin)
+  sendJson(res, 404, { ok: false, message: "Not found" }, origin)
 })
 
 server.listen(port, "127.0.0.1", () => {

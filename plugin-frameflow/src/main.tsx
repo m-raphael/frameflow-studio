@@ -1,9 +1,11 @@
 import { framer } from "framer-plugin"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createRoot } from "react-dom/client"
 import {
   copyRequestToClipboard,
+  fetchReceiverStatus,
   sendRequestToLocalReceiver,
+  type ReceiverStatus,
   type ReferenceRequest,
   type Provider
 } from "./bridge"
@@ -11,7 +13,7 @@ import {
 framer.showUI({
   position: "top right",
   width: 400,
-  height: 740
+  height: 780
 })
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
   const [useCheapModel, setUseCheapModel] = useState(false)
   const [notes, setNotes] = useState("")
   const [status, setStatus] = useState("Idle")
+  const [receiverStatus, setReceiverStatus] = useState<ReceiverStatus | null>(null)
 
   const providerHint = useMemo(() => {
     if (provider === "claude-subscription") {
@@ -29,6 +32,35 @@ function App() {
     }
     return "Use Hugging Face for cheaper fallback and lightweight preprocessing."
   }, [provider])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const poll = async () => {
+      try {
+        const next = await fetchReceiverStatus()
+        if (!cancelled) setReceiverStatus(next)
+      } catch {
+        if (!cancelled) {
+          setReceiverStatus({
+            status: "failed",
+            message: "Local receiver unreachable",
+            lastRequestAt: null,
+            lastCompletedAt: null,
+            lastErrorAt: null
+          })
+        }
+      }
+    }
+
+    poll()
+    const timer = setInterval(poll, 3000)
+
+    return () => {
+      cancelled = true
+      clearInterval(timer)
+    }
+  }, [])
 
   const requestPayload: ReferenceRequest = {
     createdAt: new Date().toISOString(),
@@ -44,7 +76,7 @@ function App() {
     setStatus("Copying request…")
     try {
       await copyRequestToClipboard(requestPayload)
-      setStatus("Copied. You can still save manually if needed.")
+      setStatus("Copied. Manual fallback available.")
     } catch {
       setStatus("Could not copy request.")
     }
@@ -53,12 +85,22 @@ function App() {
   async function handleSend() {
     setStatus("Sending to local receiver…")
     try {
-      await sendRequestToLocalReceiver(requestPayload)
-      setStatus("Sent. Local pipeline should be running.")
+      const result = await sendRequestToLocalReceiver(requestPayload)
+      setReceiverStatus(result)
+      setStatus("Request sent.")
     } catch {
       setStatus("Could not reach local receiver at 127.0.0.1:4317")
     }
   }
+
+  const statusTone =
+    receiverStatus?.status === "success"
+      ? "#1f7a1f"
+      : receiverStatus?.status === "failed"
+        ? "#a12c2c"
+        : receiverStatus?.status === "running" || receiverStatus?.status === "queued"
+          ? "#8a6500"
+          : "#666666"
 
   return (
     <main
@@ -75,6 +117,22 @@ function App() {
       <p style={{ margin: 0, fontSize: 13, opacity: 0.72 }}>
         Send provider-aware requests from Framer to the local Frameflow pipeline.
       </p>
+
+      <div
+        style={{
+          padding: 10,
+          borderRadius: 10,
+          background: "rgba(0,0,0,0.04)",
+          border: `1px solid ${statusTone}33`
+        }}
+      >
+        <div style={{ fontSize: 12, fontWeight: 700, color: statusTone }}>
+          Receiver: {receiverStatus?.status || "unknown"}
+        </div>
+        <div style={{ fontSize: 12, opacity: 0.78, marginTop: 4 }}>
+          {receiverStatus?.message || "No status available yet"}
+        </div>
+      </div>
 
       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={{ fontSize: 12, opacity: 0.7 }}>Reference URL</span>

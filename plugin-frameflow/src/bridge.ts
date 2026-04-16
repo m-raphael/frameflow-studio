@@ -12,6 +12,15 @@ export type ReferenceRequest = {
   notes: string
 }
 
+export type ReceiverStatus = {
+  ok?: boolean
+  status: "idle" | "queued" | "running" | "success" | "failed"
+  message: string
+  lastRequestAt: string | null
+  lastCompletedAt: string | null
+  lastErrorAt: string | null
+}
+
 export async function copyRequestToClipboard(request: ReferenceRequest) {
   await navigator.clipboard.writeText(JSON.stringify(request, null, 2))
   return request
@@ -26,9 +35,17 @@ export async function sendRequestToLocalReceiver(request: ReferenceRequest) {
     body: JSON.stringify(request)
   })
 
-  if (!response.ok) {
+  if (!response.ok && response.status !== 202) {
     throw new Error(`Receiver error: ${response.status}`)
   }
 
+  return response.json()
+}
+
+export async function fetchReceiverStatus(): Promise<ReceiverStatus> {
+  const response = await fetch("http://127.0.0.1:4317/status")
+  if (!response.ok) {
+    throw new Error(`Status error: ${response.status}`)
+  }
   return response.json()
 }
