@@ -5,28 +5,48 @@
       "name": "HomeHeroSection",
       "moduleUrl": "",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "sourceFile": "framer/generated/sections/HomeHeroSection.tsx",
+      "category": "hero",
+      "importHint": "Import into Framer as top-of-page hero component",
+      "fileSize": 2689,
+      "updatedAt": "2026-04-09T08:42:37.016Z"
     },
     {
       "id": "HomeSelectedWorkSection",
       "name": "HomeSelectedWorkSection",
       "moduleUrl": "",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "sourceFile": "framer/generated/sections/HomeSelectedWorkSection.tsx",
+      "category": "section",
+      "importHint": "Import into Framer as a standard page section",
+      "fileSize": 2744,
+      "updatedAt": "2026-04-09T08:42:37.017Z"
     },
     {
       "id": "HomeStudioStorySection",
       "name": "HomeStudioStorySection",
       "moduleUrl": "",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "sourceFile": "framer/generated/sections/HomeStudioStorySection.tsx",
+      "category": "section",
+      "importHint": "Import into Framer as a standard page section",
+      "fileSize": 2726,
+      "updatedAt": "2026-04-09T08:42:37.018Z"
     },
     {
       "id": "HomeFooterSection",
       "name": "HomeFooterSection",
       "moduleUrl": "",
       "width": 1440,
-      "height": 900
+      "height": 900,
+      "sourceFile": "framer/generated/sections/HomeFooterSection.tsx",
+      "category": "footer",
+      "importHint": "Import into Framer near end of page",
+      "fileSize": 2663,
+      "updatedAt": "2026-04-09T08:42:37.019Z"
     }
   ]
 }
