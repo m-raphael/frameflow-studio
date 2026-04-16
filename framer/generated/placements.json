@@ -1,18 +1,32 @@
 {
   "sections": [
     {
-      "id": "hero-waaark",
-      "name": "Hero Waaark",
-      "moduleUrl": "https://framer.com/m/hero-waaark-XXXXX.js",
+      "id": "HomeHeroSection",
+      "name": "HomeHeroSection",
+      "moduleUrl": "",
       "width": 1440,
       "height": 900
     },
     {
-      "id": "showcase-grid",
-      "name": "Showcase Grid",
-      "moduleUrl": "https://framer.com/m/showcase-grid-YYYYY.js",
+      "id": "HomeSelectedWorkSection",
+      "name": "HomeSelectedWorkSection",
+      "moduleUrl": "",
       "width": 1440,
-      "height": 1200
+      "height": 900
+    },
+    {
+      "id": "HomeStudioStorySection",
+      "name": "HomeStudioStorySection",
+      "moduleUrl": "",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "HomeFooterSection",
+      "name": "HomeFooterSection",
+      "moduleUrl": "",
+      "width": 1440,
+      "height": 900
     }
   ]
 }

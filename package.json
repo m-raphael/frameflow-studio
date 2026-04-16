@@ -17,6 +17,7 @@
     "provider:route": "node orchestrator/scripts/provider-router.mjs",
     "launch:frameflow": "node orchestrator/scripts/launch-frameflow.mjs",
     "watch:frameflow": "node orchestrator/scripts/watch-reference.mjs",
-    "receiver:frameflow": "node orchestrator/scripts/local-receiver.mjs"
+    "receiver:frameflow": "node orchestrator/scripts/local-receiver.mjs",
+    "placements:generate": "node orchestrator/scripts/generate-placements.mjs"
   }
 }
