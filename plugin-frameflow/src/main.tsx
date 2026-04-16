@@ -18,8 +18,9 @@ import {
 
 framer.showUI({
   position: "top right",
-  width: 440,
-  height: 920
+  width: 460,
+  height: 960,
+  resizable: true
 })
 
 function App() {
@@ -48,6 +49,22 @@ function App() {
     if (value === "generated-not-imported") return { bg: "#fff4db", text: "#8a6500" }
     if (value === "missing-generated-file") return { bg: "#fdeaea", text: "#a12c2c" }
     return { bg: "#f1f1f1", text: "#666666" }
+  }
+
+  const formatBytes = (value?: number | null) => {
+    if (!value && value !== 0) return "Unknown size"
+    if (value < 1024) return `${value} B`
+    if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`
+    return `${(value / (1024 * 1024)).toFixed(2)} MB`
+  }
+
+  const formatDate = (value?: string | null) => {
+    if (!value) return "Unknown update time"
+    try {
+      return new Date(value).toLocaleString()
+    } catch {
+      return value
+    }
   }
 
   useEffect(() => {
@@ -440,11 +457,27 @@ function App() {
                   </div>
                 </div>
 
-                <div style={{ fontSize: 11, opacity: 0.75 }}>
-                  Generated file: {item.generatedFile || "not found"}
+                <div style={{ fontSize: 11, opacity: 0.85 }}>
+                  Category: {item.category || "Unknown"}
                 </div>
 
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ fontSize: 11, opacity: 0.75 }}>
+                  Source file: {item.sourceFile || item.generatedFile || "not found"}
+                </div>
+
+                <div style={{ fontSize: 11, opacity: 0.75 }}>
+                  Import hint: {item.importHint || "No hint available"}
+                </div>
+
+                <div style={{ fontSize: 11, opacity: 0.75 }}>
+                  Size: {item.width || 0} × {item.height || 0} · {formatBytes(item.fileSize)}
+                </div>
+
+                <div style={{ fontSize: 11, opacity: 0.75 }}>
+                  Updated: {formatDate(item.updatedAt)}
+                </div>
+
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     disabled={!canInsert}
                     onClick={() => handleInsert(item)}
@@ -462,9 +495,9 @@ function App() {
                     Insert
                   </button>
 
-                  {item.generatedFile && (
+                  {(item.sourceFile || item.generatedFile) && (
                     <button
-                      onClick={() => handleRead(item.generatedFile!)}
+                      onClick={() => handleRead(item.sourceFile || item.generatedFile || "")}
                       style={{
                         padding: "8px 10px",
                         borderRadius: 10,
