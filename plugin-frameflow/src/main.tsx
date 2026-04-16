@@ -18,9 +18,11 @@ import {
 
 framer.showUI({
   position: "top right",
-  width: 460,
-  height: 960,
-  resizable: true
+  width: 480,
+  height: 980,
+  resizable: true,
+  minWidth: 420,
+  minHeight: 720
 })
 
 function App() {
@@ -36,6 +38,9 @@ function App() {
   const [placements, setPlacements] = useState<PlacementItem[]>([])
   const [previewTitle, setPreviewTitle] = useState("")
   const [previewContent, setPreviewContent] = useState("")
+  const [readinessFilter, setReadinessFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const providerHint = useMemo(() => {
     if (provider === "claude-subscription") {
@@ -165,6 +170,56 @@ function App() {
         : receiverStatus?.status === "running" || receiverStatus?.status === "queued"
           ? "#8a6500"
           : "#666666"
+
+  const categoryOptions = useMemo(() => {
+    const values = Array.from(new Set(placements.map((item) => item.category).filter(Boolean)))
+    return values.sort()
+  }, [placements])
+
+  const filteredPlacements = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    return placements.filter((item) => {
+      const matchesReadiness =
+        readinessFilter === "all" || (item.readiness || "unknown") === readinessFilter
+
+      const matchesCategory =
+        categoryFilter === "all" || (item.category || "uncategorized") === categoryFilter
+
+      const haystack = [
+        item.id,
+        item.name,
+        item.category,
+        item.sourceFile,
+        item.importHint,
+        item.readinessLabel
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+
+      const matchesSearch = !query || haystack.includes(query)
+
+      return matchesReadiness && matchesCategory && matchesSearch
+    })
+  }, [placements, readinessFilter, categoryFilter, searchQuery])
+
+  const groupedPlacements = useMemo(() => {
+    const order = [
+      "ready",
+      "generated-not-imported",
+      "missing-module-url",
+      "missing-generated-file"
+    ]
+
+    return order
+      .map((groupKey) => ({
+        key: groupKey,
+        title: groupKey.replace(/-/g, " "),
+        items: filteredPlacements.filter((item) => (item.readiness || "unknown") === groupKey)
+      }))
+      .filter((group) => group.items.length > 0)
+  }, [filteredPlacements])
 
   return (
     <main
@@ -408,114 +463,192 @@ function App() {
             border: "1px solid rgba(0,0,0,0.08)",
             display: "flex",
             flexDirection: "column",
-            gap: 8
+            gap: 10
           }}
         >
           <div style={{ fontSize: 13, fontWeight: 700 }}>Canvas insertion</div>
 
-          {placements.map((item) => {
-            const tone = readinessTone(item.readiness)
-            const canInsert = item.readiness === "ready"
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 11, opacity: 0.7 }}>Readiness</span>
+              <select
+                value={readinessFilter}
+                onChange={(e) => setReadinessFilter(e.target.value)}
+                style={{ padding: 8, borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)" }}
+              >
+                <option value="all">All</option>
+                <option value="ready">Ready</option>
+                <option value="generated-not-imported">Generated not imported</option>
+                <option value="missing-module-url">Missing module URL</option>
+                <option value="missing-generated-file">Missing generated file</option>
+              </select>
+            </label>
 
-            return (
+            <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 11, opacity: 0.7 }}>Category</span>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                style={{ padding: 8, borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)" }}
+              >
+                <option value="all">All</option>
+                {categoryOptions.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span style={{ fontSize: 11, opacity: 0.7 }}>Search</span>
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, id, hint, source file..."
+              style={{ padding: 8, borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)" }}
+            />
+          </label>
+
+          <div style={{ fontSize: 11, opacity: 0.7 }}>
+            Showing {filteredPlacements.length} of {placements.length} placements
+          </div>
+
+          {groupedPlacements.length ? (
+            groupedPlacements.map((group) => (
               <div
-                key={item.id}
+                key={group.key}
                 style={{
-                  padding: 10,
-                  borderRadius: 10,
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  background: "#fff",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 8
+                  gap: 8,
+                  paddingTop: 4
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 8,
-                    alignItems: "center"
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 600 }}>{item.name}</div>
-                    <div style={{ fontSize: 11, opacity: 0.65 }}>{item.id}</div>
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: tone.text,
-                      background: tone.bg,
-                      padding: "6px 8px",
-                      borderRadius: 999
-                    }}
-                  >
-                    {item.readinessLabel || "Unknown"}
-                  </div>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: "capitalize" }}>
+                  {group.title} ({group.items.length})
                 </div>
 
-                <div style={{ fontSize: 11, opacity: 0.85 }}>
-                  Category: {item.category || "Unknown"}
-                </div>
+                {group.items.map((item) => {
+                  const tone = readinessTone(item.readiness)
+                  const canInsert = item.readiness === "ready"
 
-                <div style={{ fontSize: 11, opacity: 0.75 }}>
-                  Source file: {item.sourceFile || item.generatedFile || "not found"}
-                </div>
-
-                <div style={{ fontSize: 11, opacity: 0.75 }}>
-                  Import hint: {item.importHint || "No hint available"}
-                </div>
-
-                <div style={{ fontSize: 11, opacity: 0.75 }}>
-                  Size: {item.width || 0} × {item.height || 0} · {formatBytes(item.fileSize)}
-                </div>
-
-                <div style={{ fontSize: 11, opacity: 0.75 }}>
-                  Updated: {formatDate(item.updatedAt)}
-                </div>
-
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button
-                    disabled={!canInsert}
-                    onClick={() => handleInsert(item)}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: 10,
-                      border: "none",
-                      background: canInsert ? "#111" : "#d8d8d8",
-                      color: canInsert ? "#fff" : "#666",
-                      cursor: canInsert ? "pointer" : "not-allowed",
-                      fontSize: 12,
-                      fontWeight: 600
-                    }}
-                  >
-                    Insert
-                  </button>
-
-                  {(item.sourceFile || item.generatedFile) && (
-                    <button
-                      onClick={() => handleRead(item.sourceFile || item.generatedFile || "")}
+                  return (
+                    <div
+                      key={item.id}
                       style={{
-                        padding: "8px 10px",
+                        padding: 10,
                         borderRadius: 10,
-                        border: "1px solid rgba(0,0,0,0.12)",
+                        border: "1px solid rgba(0,0,0,0.08)",
                         background: "#fff",
-                        color: "#111",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        fontWeight: 600
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8
                       }}
                     >
-                      Preview source
-                    </button>
-                  )}
-                </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 8,
+                          alignItems: "center"
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 600 }}>{item.name}</div>
+                          <div style={{ fontSize: 11, opacity: 0.65 }}>{item.id}</div>
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: tone.text,
+                            background: tone.bg,
+                            padding: "6px 8px",
+                            borderRadius: 999
+                          }}
+                        >
+                          {item.readinessLabel || "Unknown"}
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: 11, opacity: 0.85 }}>
+                        Category: {item.category || "Unknown"}
+                      </div>
+
+                      <div style={{ fontSize: 11, opacity: 0.75 }}>
+                        Source file: {item.sourceFile || item.generatedFile || "not found"}
+                      </div>
+
+                      <div style={{ fontSize: 11, opacity: 0.75 }}>
+                        Import hint: {item.importHint || "No hint available"}
+                      </div>
+
+                      <div style={{ fontSize: 11, opacity: 0.75 }}>
+                        Size: {item.width || 0} × {item.height || 0} · {formatBytes(item.fileSize)}
+                      </div>
+
+                      <div style={{ fontSize: 11, opacity: 0.75 }}>
+                        Updated: {formatDate(item.updatedAt)}
+                      </div>
+
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          disabled={!canInsert}
+                          onClick={() => handleInsert(item)}
+                          style={{
+                            padding: "8px 10px",
+                            borderRadius: 10,
+                            border: "none",
+                            background: canInsert ? "#111" : "#d8d8d8",
+                            color: canInsert ? "#fff" : "#666",
+                            cursor: canInsert ? "pointer" : "not-allowed",
+                            fontSize: 12,
+                            fontWeight: 600
+                          }}
+                        >
+                          Insert
+                        </button>
+
+                        {(item.sourceFile || item.generatedFile) && (
+                          <button
+                            onClick={() => handleRead(item.sourceFile || item.generatedFile || "")}
+                            style={{
+                              padding: "8px 10px",
+                              borderRadius: 10,
+                              border: "1px solid rgba(0,0,0,0.12)",
+                              background: "#fff",
+                              color: "#111",
+                              cursor: "pointer",
+                              fontSize: 12,
+                              fontWeight: 600
+                            }}
+                          >
+                            Preview source
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })}
+            ))
+          ) : (
+            <div
+              style={{
+                padding: 12,
+                borderRadius: 10,
+                background: "#fff",
+                border: "1px solid rgba(0,0,0,0.08)",
+                fontSize: 12,
+                opacity: 0.75
+              }}
+            >
+              No placements match the current filters.
+            </div>
+          )}
         </div>
       )}
 
