@@ -27,3 +27,8 @@ yarn-error.log*
 .claude/
 CLAUDE.local.md
 setup_claude.sh
+
+# Claude Code Local Configs (Do Not Commit)
+.claude/settings.local.json
+CLAUDE.local.md
+.claude/skills/
