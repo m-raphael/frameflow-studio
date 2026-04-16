@@ -3,10 +3,13 @@ import { useEffect, useMemo, useState } from "react"
 import { createRoot } from "react-dom/client"
 import {
   copyRequestToClipboard,
+  fetchPlacements,
   fetchReceiverArtifacts,
   fetchReceiverStatus,
+  insertPlacement,
   readGeneratedFile,
   sendRequestToLocalReceiver,
+  type PlacementItem,
   type ReceiverArtifacts,
   type ReceiverStatus,
   type ReferenceRequest,
@@ -29,6 +32,7 @@ function App() {
   const [status, setStatus] = useState("Idle")
   const [receiverStatus, setReceiverStatus] = useState<ReceiverStatus | null>(null)
   const [receiverArtifacts, setReceiverArtifacts] = useState<ReceiverArtifacts | null>(null)
+  const [placements, setPlacements] = useState<PlacementItem[]>([])
   const [previewTitle, setPreviewTitle] = useState("")
   const [previewContent, setPreviewContent] = useState("")
 
@@ -38,6 +42,13 @@ function App() {
     }
     return "Use Hugging Face for cheaper fallback and lightweight preprocessing."
   }, [provider])
+
+  const readinessTone = (value?: string) => {
+    if (value === "ready") return { bg: "#e8f7ea", text: "#1f7a1f" }
+    if (value === "generated-not-imported") return { bg: "#fff4db", text: "#8a6500" }
+    if (value === "missing-generated-file") return { bg: "#fdeaea", text: "#a12c2c" }
+    return { bg: "#f1f1f1", text: "#666666" }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -50,6 +61,9 @@ function App() {
         if (nextStatus.status === "success") {
           const nextArtifacts = await fetchReceiverArtifacts()
           if (!cancelled) setReceiverArtifacts(nextArtifacts)
+
+          const nextPlacements = await fetchPlacements()
+          if (!cancelled) setPlacements(nextPlacements.placements || [])
         }
       } catch {
         if (!cancelled) {
@@ -113,6 +127,16 @@ function App() {
       setStatus("Preview loaded.")
     } catch {
       setStatus(`Could not read ${file}`)
+    }
+  }
+
+  async function handleInsert(item: PlacementItem) {
+    setStatus(`Inserting ${item.name}…`)
+    try {
+      await insertPlacement(item)
+      setStatus(`${item.name} inserted on canvas.`)
+    } catch {
+      setStatus(`Could not insert ${item.name}. Check module URL in Framer.`)
     }
   }
 
@@ -305,49 +329,160 @@ function App() {
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Reports</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {receiverArtifacts.artifacts.reports.length
-                ? receiverArtifacts.artifacts.reports.map((item) => (
-                    <button
-                      key={item}
-                      onClick={() => handleRead(item)}
-                      style={{
-                        textAlign: "left",
-                        padding: "8px 10px",
-                        borderRadius: 10,
-                        border: "1px solid rgba(0,0,0,0.08)",
-                        background: "#fff",
-                        cursor: "pointer",
-                        fontSize: 12
-                      }}
-                    >
-                      {item}
-                    </button>
-                  ))
-                : <div style={{ fontSize: 12, opacity: 0.78 }}>No reports found</div>}
+              {receiverArtifacts.artifacts.reports.length ? (
+                receiverArtifacts.artifacts.reports.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => handleRead(item)}
+                    style={{
+                      textAlign: "left",
+                      padding: "8px 10px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      background: "#fff",
+                      cursor: "pointer",
+                      fontSize: 12
+                    }}
+                  >
+                    {item}
+                  </button>
+                ))
+              ) : (
+                <div style={{ fontSize: 12, opacity: 0.78 }}>No reports found</div>
+              )}
             </div>
           </div>
 
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Sections</div>
             <div style={{ fontSize: 12, opacity: 0.78, maxHeight: 100, overflow: "auto" }}>
-              {receiverArtifacts.artifacts.sections.length
-                ? receiverArtifacts.artifacts.sections.map((item) => <div key={item}>{item}</div>)
-                : "No sections found"}
+              {receiverArtifacts.artifacts.sections.length ? (
+                receiverArtifacts.artifacts.sections.map((item) => <div key={item}>{item}</div>)
+              ) : (
+                "No sections found"
+              )}
             </div>
           </div>
 
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Motion</div>
             <div style={{ fontSize: 12, opacity: 0.78, maxHeight: 100, overflow: "auto" }}>
-              {receiverArtifacts.artifacts.motion.length
-                ? receiverArtifacts.artifacts.motion.map((item) => (
-                    <div key={item.id}>
-                      {item.id} — {item.implementation}
-                    </div>
-                  ))
-                : "No motion artifacts found"}
+              {receiverArtifacts.artifacts.motion.length ? (
+                receiverArtifacts.artifacts.motion.map((item) => (
+                  <div key={item.id}>
+                    {item.id} — {item.implementation}
+                  </div>
+                ))
+              ) : (
+                "No motion artifacts found"
+              )}
             </div>
           </div>
+        </div>
+      )}
+
+      {placements.length > 0 && (
+        <div
+          style={{
+            marginTop: 4,
+            padding: 12,
+            borderRadius: 12,
+            background: "rgba(0,0,0,0.03)",
+            border: "1px solid rgba(0,0,0,0.08)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700 }}>Canvas insertion</div>
+
+          {placements.map((item) => {
+            const tone = readinessTone(item.readiness)
+            const canInsert = item.readiness === "ready"
+
+            return (
+              <div
+                key={item.id}
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  background: "#fff",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 8,
+                    alignItems: "center"
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600 }}>{item.name}</div>
+                    <div style={{ fontSize: 11, opacity: 0.65 }}>{item.id}</div>
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: tone.text,
+                      background: tone.bg,
+                      padding: "6px 8px",
+                      borderRadius: 999
+                    }}
+                  >
+                    {item.readinessLabel || "Unknown"}
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 11, opacity: 0.75 }}>
+                  Generated file: {item.generatedFile || "not found"}
+                </div>
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    disabled={!canInsert}
+                    onClick={() => handleInsert(item)}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: 10,
+                      border: "none",
+                      background: canInsert ? "#111" : "#d8d8d8",
+                      color: canInsert ? "#fff" : "#666",
+                      cursor: canInsert ? "pointer" : "not-allowed",
+                      fontSize: 12,
+                      fontWeight: 600
+                    }}
+                  >
+                    Insert
+                  </button>
+
+                  {item.generatedFile && (
+                    <button
+                      onClick={() => handleRead(item.generatedFile!)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        background: "#fff",
+                        color: "#111",
+                        cursor: "pointer",
+                        fontSize: 12,
+                        fontWeight: 600
+                      }}
+                    >
+                      Preview source
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

@@ -43,10 +43,76 @@ const safeReadJson = (relativePath) => {
   }
 }
 
+const normalizeNameToFileStem = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+
+const findGeneratedSource = (placement) => {
+  const candidates = [
+    `framer/code-components/${placement.name}.tsx`,
+    `framer/code-components/${placement.id}.tsx`,
+    `framer/code-components/${normalizeNameToFileStem(placement.name)}.tsx`,
+    `framer/generated/sections/${placement.id}.tsx`,
+    `framer/generated/sections/${normalizeNameToFileStem(placement.name)}.tsx`
+  ]
+
+  const found = candidates.find((file) => fs.existsSync(path.join(root, file)))
+  return found || null
+}
+
+const getPlacementReadiness = (placement) => {
+  const generatedFile = findGeneratedSource(placement)
+  const moduleUrl = String(placement.moduleUrl || "").trim()
+  const hasPlaceholderUrl =
+    !moduleUrl ||
+    moduleUrl.includes("XXXXX") ||
+    moduleUrl.includes("YYYYY") ||
+    moduleUrl.includes("REPLACE") ||
+    !moduleUrl.startsWith("https://framer.com/m/")
+
+  if (generatedFile && !hasPlaceholderUrl) {
+    return {
+      ...placement,
+      generatedFile,
+      readiness: "ready",
+      readinessLabel: "Ready to insert"
+    }
+  }
+
+  if (generatedFile && hasPlaceholderUrl) {
+    return {
+      ...placement,
+      generatedFile,
+      readiness: "generated-not-imported",
+      readinessLabel: "Generated but not imported"
+    }
+  }
+
+  if (!generatedFile && !hasPlaceholderUrl) {
+    return {
+      ...placement,
+      generatedFile: null,
+      readiness: "missing-generated-file",
+      readinessLabel: "Missing generated file"
+    }
+  }
+
+  return {
+    ...placement,
+    generatedFile: null,
+    readiness: "missing-module-url",
+    readinessLabel: "Missing module URL"
+  }
+}
+
 const collectArtifacts = () => {
   const sectionManifest = safeReadJson("framer/generated/sections/_manifest.json")
   const motionDecisions = safeReadJson("framer/generated/motion/motion-decisions.generated.json")
-  const placements = safeReadJson("framer/generated/placements.json")
+  const placementsFile = safeReadJson("framer/generated/placements.json")
+  const placements = Array.isArray(placementsFile?.sections) ? placementsFile.sections : []
 
   artifacts = {
     sections: sectionManifest?.files || [],
@@ -58,13 +124,13 @@ const collectArtifacts = () => {
       "docs/build-summary.md",
       "docs/motion-build-report.md"
     ].filter((file) => fs.existsSync(path.join(root, file))),
-    placements: placements?.sections || []
+    placements: placements.map(getPlacementReadiness)
   }
 }
 
 const isAllowedReadPath = (requestedFile) => {
   const normalized = path.normalize(requestedFile).replace(/^(\.\.(\/|\\|$))+/, "")
-  const allowedPrefixes = ["docs/", "framer/generated/", "orchestrator/output/"]
+  const allowedPrefixes = ["docs/", "framer/generated/", "framer/code-components/", "orchestrator/output/"]
   return {
     normalized,
     allowed: allowedPrefixes.some((prefix) => normalized.startsWith(prefix))
@@ -103,6 +169,8 @@ const launchPipeline = () => {
   })
 }
 
+collectArtifacts()
+
 const server = http.createServer((req, res) => {
   const origin = req.headers.origin || "*"
   const url = new URL(req.url, `http://127.0.0.1:${port}`)
@@ -123,11 +191,13 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/artifacts") {
+    collectArtifacts()
     sendJson(res, 200, { ok: true, status: state.status, artifacts }, origin)
     return
   }
 
   if (req.method === "GET" && url.pathname === "/placements") {
+    collectArtifacts()
     sendJson(res, 200, { ok: true, placements: artifacts.placements || [] }, origin)
     return
   }

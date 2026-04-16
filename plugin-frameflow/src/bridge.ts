@@ -1,3 +1,5 @@
+import { framer } from "framer-plugin"
+
 export type Provider = "claude-subscription" | "huggingface-free"
 export type ReferenceStyle = "agency" | "editorial" | "product"
 export type BuildMode = "analysis" | "scaffold" | "full"
@@ -21,6 +23,23 @@ export type ReceiverStatus = {
   lastErrorAt: string | null
 }
 
+export type PlacementReadiness =
+  | "ready"
+  | "missing-module-url"
+  | "generated-not-imported"
+  | "missing-generated-file"
+
+export type PlacementItem = {
+  id: string
+  name: string
+  moduleUrl: string
+  width?: number
+  height?: number
+  generatedFile?: string | null
+  readiness?: PlacementReadiness
+  readinessLabel?: string
+}
+
 export type ReceiverArtifacts = {
   ok?: boolean
   status: string
@@ -28,6 +47,7 @@ export type ReceiverArtifacts = {
     sections: string[]
     motion: { id: string; implementation: string }[]
     reports: string[]
+    placements?: PlacementItem[]
   }
 }
 
@@ -45,9 +65,7 @@ export async function copyRequestToClipboard(request: ReferenceRequest) {
 export async function sendRequestToLocalReceiver(request: ReferenceRequest) {
   const response = await fetch("http://127.0.0.1:4317/request", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request)
   })
 
@@ -60,27 +78,36 @@ export async function sendRequestToLocalReceiver(request: ReferenceRequest) {
 
 export async function fetchReceiverStatus(): Promise<ReceiverStatus> {
   const response = await fetch("http://127.0.0.1:4317/status")
-  if (!response.ok) {
-    throw new Error(`Status error: ${response.status}`)
-  }
+  if (!response.ok) throw new Error(`Status error: ${response.status}`)
   return response.json()
 }
 
 export async function fetchReceiverArtifacts(): Promise<ReceiverArtifacts> {
   const response = await fetch("http://127.0.0.1:4317/artifacts")
-  if (!response.ok) {
-    throw new Error(`Artifacts error: ${response.status}`)
-  }
+  if (!response.ok) throw new Error(`Artifacts error: ${response.status}`)
+  return response.json()
+}
+
+export async function fetchPlacements(): Promise<{ ok?: boolean; placements: PlacementItem[] }> {
+  const response = await fetch("http://127.0.0.1:4317/placements")
+  if (!response.ok) throw new Error(`Placements error: ${response.status}`)
   return response.json()
 }
 
 export async function readGeneratedFile(file: string): Promise<ReadResponse> {
   const url = new URL("http://127.0.0.1:4317/read")
   url.searchParams.set("file", file)
-
   const response = await fetch(url.toString())
-  if (!response.ok) {
-    throw new Error(`Read error: ${response.status}`)
-  }
+  if (!response.ok) throw new Error(`Read error: ${response.status}`)
   return response.json()
+}
+
+export async function insertPlacement(item: PlacementItem) {
+  return framer.addComponentInstance({
+    url: item.moduleUrl,
+    attributes: {
+      width: item.width ?? 1200,
+      height: item.height ?? 800
+    }
+  })
 }
