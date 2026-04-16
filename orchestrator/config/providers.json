@@ -1,0 +1,19 @@
+{
+  "defaultProvider": "claude-subscription",
+  "providers": {
+    "claude-subscription": {
+      "type": "claude-code",
+      "mode": "subscription",
+      "requiresApiKey": false,
+      "notes": "Use Claude Code logged into Pro or Max. Keep ANTHROPIC_API_KEY unset."
+    },
+    "huggingface-free": {
+      "type": "huggingface",
+      "mode": "routed-inference",
+      "requiresApiKey": true,
+      "envKey": "HF_TOKEN",
+      "baseURL": "https://router.huggingface.co",
+      "notes": "Use for cheap fallback, preprocessing, and classification."
+    }
+  }
+}

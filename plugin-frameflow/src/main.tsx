@@ -1,44 +1,65 @@
 import { framer } from "framer-plugin"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { createRoot } from "react-dom/client"
-import { copyRequestToClipboard, type ReferenceRequest } from "./bridge"
+import { copyRequestToClipboard, type ReferenceRequest, type Provider } from "./bridge"
 
 framer.showUI({
   position: "top right",
-  width: 380,
-  height: 580
+  width: 400,
+  height: 680
 })
 
 function App() {
   const [referenceUrl, setReferenceUrl] = useState("")
   const [referenceStyle, setReferenceStyle] = useState<ReferenceRequest["referenceStyle"]>("agency")
   const [buildMode, setBuildMode] = useState<ReferenceRequest["buildMode"]>("full")
+  const [provider, setProvider] = useState<Provider>("claude-subscription")
+  const [useCheapModel, setUseCheapModel] = useState(false)
   const [notes, setNotes] = useState("")
   const [status, setStatus] = useState("Idle")
 
+  const providerHint = useMemo(() => {
+    if (provider === "claude-subscription") {
+      return "Use Claude Code with your Pro/Max login. Keep ANTHROPIC_API_KEY unset in the shell."
+    }
+    return "Use Hugging Face for cheaper fallback and lightweight preprocessing tasks."
+  }, [provider])
+
   async function exportRequest() {
     setStatus("Exporting request…")
+
     const request: ReferenceRequest = {
       createdAt: new Date().toISOString(),
       referenceUrl,
       referenceStyle,
       buildMode,
+      provider,
+      useCheapModel,
       notes
     }
 
     try {
       await copyRequestToClipboard(request)
-      setStatus("Copied. Save as orchestrator/input/reference-request.json and run the pipeline.")
+      setStatus("Copied. Save as orchestrator/input/reference-request.json")
     } catch {
       setStatus("Could not copy request.")
     }
   }
 
   return (
-    <main style={{ fontFamily: "Inter, sans-serif", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-      <h1 style={{ margin: 0, fontSize: 20 }}>Frameflow</h1>
+    <main
+      style={{
+        fontFamily: "Inter, sans-serif",
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        gap: 12
+      }}
+    >
+      <h1 style={{ margin: 0, fontSize: 20, lineHeight: 1.1 }}>Frameflow</h1>
+
       <p style={{ margin: 0, fontSize: 13, opacity: 0.72 }}>
-        Capture a reference in Framer, then hand it to the local pipeline.
+        Prepare a provider-aware request for the local Frameflow pipeline.
       </p>
 
       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -73,9 +94,52 @@ function App() {
         >
           <option value="analysis">Analysis</option>
           <option value="scaffold">Scaffold</option>
-          <option value="full">Full</option>
+          <option value="full">Full pipeline</option>
         </select>
       </label>
+
+      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>Provider</span>
+        <select
+          value={provider}
+          onChange={(e) => setProvider(e.target.value as Provider)}
+          style={{ padding: 10, borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)" }}
+        >
+          <option value="claude-subscription">Claude subscription</option>
+          <option value="huggingface-free">Hugging Face free</option>
+        </select>
+      </label>
+
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: 10,
+          borderRadius: 10,
+          border: "1px solid rgba(0,0,0,0.08)"
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={useCheapModel}
+          onChange={(e) => setUseCheapModel(e.target.checked)}
+        />
+        <span style={{ fontSize: 13 }}>Prefer cheap model when task is simple</span>
+      </label>
+
+      <div
+        style={{
+          fontSize: 12,
+          lineHeight: 1.45,
+          opacity: 0.75,
+          padding: 10,
+          borderRadius: 10,
+          background: "rgba(0,0,0,0.04)"
+        }}
+      >
+        {providerHint}
+      </div>
 
       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={{ fontSize: 12, opacity: 0.7 }}>Notes</span>
@@ -83,8 +147,13 @@ function App() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={7}
-          placeholder="Micro-interactions, hover intent, image swaps, asset replacement rules..."
-          style={{ padding: 10, borderRadius: 10, border: "1px solid rgba(0,0,0,0.12)", resize: "vertical" }}
+          placeholder="Micro-interactions, scroll behavior, cursor intent, asset replacement rules..."
+          style={{
+            padding: 10,
+            borderRadius: 10,
+            border: "1px solid rgba(0,0,0,0.12)",
+            resize: "vertical"
+          }}
         />
       </label>
 
@@ -94,8 +163,8 @@ function App() {
           padding: "12px 14px",
           borderRadius: 12,
           border: "none",
-          background: "#111",
-          color: "#fff",
+          background: "#111111",
+          color: "#ffffff",
           fontWeight: 600,
           cursor: "pointer"
         }}

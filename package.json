@@ -11,6 +11,9 @@
     "pipeline:editorial": "npm run build:tokens && npm run build:site -- --map=site-map-editorial.json && npm run build:motion && npm run build:motion-files && npm run build:summary",
     "pipeline:product": "npm run build:tokens && npm run build:site -- --map=site-map-product.json && npm run build:motion && npm run build:motion-files && npm run build:summary",
     "pick:map": "node orchestrator/scripts/pick-map.mjs",
-    "run:frameflow": "node orchestrator/scripts/run-frameflow.mjs"
+    "run:frameflow": "node orchestrator/scripts/run-frameflow.mjs",
+    "provider:select": "node orchestrator/scripts/select-provider.mjs",
+    "provider:check": "node orchestrator/scripts/check-provider.mjs",
+    "provider:route": "node orchestrator/scripts/provider-router.mjs"
   }
 }

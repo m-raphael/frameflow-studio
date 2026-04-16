@@ -1,8 +1,14 @@
+export type Provider = "claude-subscription" | "huggingface-free"
+export type ReferenceStyle = "agency" | "editorial" | "product"
+export type BuildMode = "analysis" | "scaffold" | "full"
+
 export type ReferenceRequest = {
   createdAt: string
   referenceUrl: string
-  referenceStyle: "agency" | "editorial" | "product"
-  buildMode: "analysis" | "scaffold" | "full"
+  referenceStyle: ReferenceStyle
+  buildMode: BuildMode
+  provider: Provider
+  useCheapModel: boolean
   notes: string
 }
 
