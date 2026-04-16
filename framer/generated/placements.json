@@ -1,0 +1,18 @@
+{
+  "sections": [
+    {
+      "id": "hero-waaark",
+      "name": "Hero Waaark",
+      "moduleUrl": "https://framer.com/m/hero-waaark-XXXXX.js",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "id": "showcase-grid",
+      "name": "Showcase Grid",
+      "moduleUrl": "https://framer.com/m/showcase-grid-YYYYY.js",
+      "width": 1440,
+      "height": 1200
+    }
+  ]
+}

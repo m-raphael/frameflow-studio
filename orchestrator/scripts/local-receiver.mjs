@@ -11,7 +11,8 @@ let childProcess = null
 let artifacts = {
   sections: [],
   motion: [],
-  reports: []
+  reports: [],
+  placements: []
 }
 
 let state = {
@@ -45,6 +46,7 @@ const safeReadJson = (relativePath) => {
 const collectArtifacts = () => {
   const sectionManifest = safeReadJson("framer/generated/sections/_manifest.json")
   const motionDecisions = safeReadJson("framer/generated/motion/motion-decisions.generated.json")
+  const placements = safeReadJson("framer/generated/placements.json")
 
   artifacts = {
     sections: sectionManifest?.files || [],
@@ -55,17 +57,14 @@ const collectArtifacts = () => {
     reports: [
       "docs/build-summary.md",
       "docs/motion-build-report.md"
-    ].filter((file) => fs.existsSync(path.join(root, file)))
+    ].filter((file) => fs.existsSync(path.join(root, file))),
+    placements: placements?.sections || []
   }
 }
 
 const isAllowedReadPath = (requestedFile) => {
   const normalized = path.normalize(requestedFile).replace(/^(\.\.(\/|\\|$))+/, "")
-  const allowedPrefixes = [
-    "docs/",
-    "framer/generated/",
-    "orchestrator/output/"
-  ]
+  const allowedPrefixes = ["docs/", "framer/generated/", "orchestrator/output/"]
   return {
     normalized,
     allowed: allowedPrefixes.some((prefix) => normalized.startsWith(prefix))
@@ -119,19 +118,17 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/status") {
-    sendJson(res, 200, {
-      ok: true,
-      ...state
-    }, origin)
+    sendJson(res, 200, { ok: true, ...state }, origin)
     return
   }
 
   if (req.method === "GET" && url.pathname === "/artifacts") {
-    sendJson(res, 200, {
-      ok: true,
-      status: state.status,
-      artifacts
-    }, origin)
+    sendJson(res, 200, { ok: true, status: state.status, artifacts }, origin)
+    return
+  }
+
+  if (req.method === "GET" && url.pathname === "/placements") {
+    sendJson(res, 200, { ok: true, placements: artifacts.placements || [] }, origin)
     return
   }
 
@@ -140,39 +137,24 @@ const server = http.createServer((req, res) => {
     const { normalized, allowed } = isAllowedReadPath(file)
 
     if (!allowed) {
-      sendJson(res, 403, {
-        ok: false,
-        message: "File path not allowed"
-      }, origin)
+      sendJson(res, 403, { ok: false, message: "File path not allowed" }, origin)
       return
     }
 
     const absolutePath = path.join(root, normalized)
-
     if (!fs.existsSync(absolutePath)) {
-      sendJson(res, 404, {
-        ok: false,
-        message: "File not found"
-      }, origin)
+      sendJson(res, 404, { ok: false, message: "File not found" }, origin)
       return
     }
 
     const content = fs.readFileSync(absolutePath, "utf8")
-    sendJson(res, 200, {
-      ok: true,
-      file: normalized,
-      content
-    }, origin)
+    sendJson(res, 200, { ok: true, file: normalized, content }, origin)
     return
   }
 
   if (req.method === "POST" && url.pathname === "/request") {
     let body = ""
-
-    req.on("data", (chunk) => {
-      body += chunk
-    })
-
+    req.on("data", (chunk) => { body += chunk })
     req.on("end", () => {
       try {
         const payload = JSON.parse(body)
@@ -196,7 +178,6 @@ const server = http.createServer((req, res) => {
         sendJson(res, 400, { ok: false, ...state }, origin)
       }
     })
-
     return
   }
 
