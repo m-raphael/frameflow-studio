@@ -13,6 +13,7 @@ const run = (label, command, args = []) => {
   }
 };
 
+run('Analyzing reference URL', 'npm', ['run', 'build:analyze']);
 run('Selecting provider', 'npm', ['run', 'provider:select']);
 run('Checking provider safety', 'npm', ['run', 'provider:check']);
 run('Routing provider tasks', 'npm', ['run', 'provider:route']);
