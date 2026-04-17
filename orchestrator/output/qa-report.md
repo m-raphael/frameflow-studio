@@ -1,10 +1,10 @@
 # QA Report
 
 ## Project
-- Reference: Unknown
-- Build target: Unknown
-- Build mode: Unknown
-- Date: 2026-04-17T05:03:37.993Z
+- Reference: https://waaark.com/
+- Build target: agency
+- Build mode: full
+- Date: 2026-04-17T05:08:32.166Z
 - Generator: orchestrator/scripts/build-qa.mjs
 
 ## Summary

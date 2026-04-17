@@ -11,7 +11,7 @@ const getArg = (name, fallback = "") => {
 
 const mapFile = getArg("map", "site-map.json")
 const mapPath = path.join(root, "orchestrator", "output", mapFile)
-const tokensPath = path.join(root, "framer", "generated", "tokens.generated.ts")
+const tokensJsonPath = path.join(root, "framer", "generated", "tokens.generated.json")
 const outDir = path.join(root, "framer", "generated", "sections")
 
 if (!fs.existsSync(mapPath)) {
@@ -19,12 +19,14 @@ if (!fs.existsSync(mapPath)) {
   process.exit(1)
 }
 
-if (!fs.existsSync(tokensPath)) {
+if (!fs.existsSync(tokensJsonPath)) {
   console.error("Missing generated tokens. Run: npm run build:tokens")
   process.exit(1)
 }
 
 const siteMap = JSON.parse(fs.readFileSync(mapPath, "utf8"))
+const tokens = JSON.parse(fs.readFileSync(tokensJsonPath, "utf8"))
+const inlinedTokens = JSON.stringify(tokens, null, 2).replace(/^/gm, "  ").trimStart()
 fs.mkdirSync(outDir, { recursive: true })
 
 const toPascalCase = (value) =>
@@ -50,7 +52,8 @@ for (const page of siteMap.pages || []) {
 
     const content = `import * as React from "react"
 import { addPropertyControls, ControlType } from "framer"
-import { designTokens } from "../tokens.generated"
+
+const designTokens = ${inlinedTokens}
 
 /**
  * Generated from ${mapFile}

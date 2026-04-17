@@ -1,9 +1,44 @@
 import * as React from "react"
 import { addPropertyControls, ControlType } from "framer"
-import { designTokens } from "../tokens.generated"
+
+const designTokens = {
+    "themeName": "frameflow-default",
+    "fonts": {
+      "display": "Inter",
+      "body": "Inter"
+    },
+    "colors": {
+      "background": "#0B0B0B",
+      "surface": "#111111",
+      "surface2": "#171717",
+      "text": "#F5F5F0",
+      "muted": "#B8B8B0",
+      "primary": "#D6FF3F",
+      "border": "rgba(255,255,255,0.08)"
+    },
+    "radius": {
+      "sm": 8,
+      "md": 14,
+      "lg": 24
+    },
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 40,
+      "xxl": 80
+    },
+    "motion": {
+      "easePrimary": "power3.out",
+      "durationFast": 0.35,
+      "durationBase": 0.7,
+      "durationSlow": 1.2
+    }
+  }
 
 /**
- * Generated from site-map-agency.json
+ * Generated from site-map.json
  * Page: home
  * Section: hero
  * Kind: hero
@@ -87,7 +122,7 @@ export default function HomeHeroSection(props: Props) {
 
 HomeHeroSection.defaultProps = {
   title: "Hero",
-  notes: "Should feel sharp, premium, energetic",
+  notes: "Large display text, dark stage, immediate kinetic impact",
   background: designTokens.colors.surface,
   textColor: designTokens.colors.text
 }
@@ -101,7 +136,7 @@ addPropertyControls(HomeHeroSection, {
   notes: {
     type: ControlType.String,
     title: "Notes",
-    defaultValue: "Should feel sharp, premium, energetic"
+    defaultValue: "Large display text, dark stage, immediate kinetic impact"
   },
   background: {
     type: ControlType.Color,

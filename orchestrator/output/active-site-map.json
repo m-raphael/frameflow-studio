@@ -1,0 +1,11 @@
+{
+  "createdAt": "2026-04-17T05:10:00.000Z",
+  "referenceUrl": "https://waaark.com/",
+  "referenceStyle": "agency",
+  "buildMode": "full",
+  "provider": "claude-subscription",
+  "useCheapModel": false,
+  "notes": "",
+  "chosenSiteMap": "site-map-agency.json",
+  "pipelineCommand": "npm run pipeline:agency"
+}

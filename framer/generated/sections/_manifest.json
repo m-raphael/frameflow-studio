@@ -1,10 +1,10 @@
 {
-  "source": "orchestrator/output/site-map-agency.json",
-  "generatedAt": "2026-04-09T08:42:37.018Z",
+  "source": "orchestrator/output/site-map.json",
+  "generatedAt": "2026-04-17T05:39:31.842Z",
   "files": [
     "framer/generated/sections/HomeHeroSection.tsx",
+    "framer/generated/sections/HomeIntroStorySection.tsx",
     "framer/generated/sections/HomeSelectedWorkSection.tsx",
-    "framer/generated/sections/HomeStudioStorySection.tsx",
     "framer/generated/sections/HomeFooterSection.tsx"
   ]
 }

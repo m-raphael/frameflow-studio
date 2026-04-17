@@ -1,0 +1,10 @@
+{
+  "provider": "claude-subscription",
+  "tasks": {
+    "analyzeReference": "claude-code",
+    "classifySections": "claude-code",
+    "decideMotion": "claude-code",
+    "generatePrompts": "claude-code",
+    "lowCostTagging": "optional"
+  }
+}

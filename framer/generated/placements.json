@@ -3,26 +3,26 @@
     {
       "id": "HomeHeroSection",
       "name": "HomeHeroSection",
-      "moduleUrl": "",
+      "moduleUrl": "https://framer.com/m/Hero-Rl1aQl.js@nLu77viQLqtsXIGUCMa9https://framer.com/m/Hero-Rl1aQl.js@nLu77viQLqtsXIGUCMa9https://framer.com/m/Hero-Rl1aQl.js@JfZ1df7MJ7P35UqvG1EFhttps://framer.com/m/Hero-Rl1aQl.js@JfZ1df7MJ7P35UqvG1EFhttps://framer.com/m/Hero-Rl1aQl.js@JfZ1df7MJ7P35UqvG1EFhttps://framer.com/m/Hero-Rl1aQl.js@JfZ1df7MJ7P35UqvG1EFhttps://framer.com/m/Hero-Rl1aQl.js@JfZ1df7MJ7P35UqvG1EFhttps://framer.com/m/Hero-45dC39.js@XLF2DzD2vJAMzHNIRU5Z",
       "width": 1440,
       "height": 900,
       "sourceFile": "framer/generated/sections/HomeHeroSection.tsx",
       "category": "hero",
       "importHint": "Import into Framer as top-of-page hero component",
       "fileSize": 2689,
-      "updatedAt": "2026-04-09T08:42:37.016Z"
+      "updatedAt": "2026-04-17T05:07:14.128Z"
     },
     {
       "id": "HomeSelectedWorkSection",
       "name": "HomeSelectedWorkSection",
-      "moduleUrl": "",
+      "moduleUrl": "https://framer.com/m/Hero-Rl1aQl.js@nLu77viQLqtsXIGUCMa9",
       "width": 1440,
       "height": 900,
       "sourceFile": "framer/generated/sections/HomeSelectedWorkSection.tsx",
       "category": "section",
       "importHint": "Import into Framer as a standard page section",
       "fileSize": 2744,
-      "updatedAt": "2026-04-09T08:42:37.017Z"
+      "updatedAt": "2026-04-17T05:07:14.129Z"
     },
     {
       "id": "HomeStudioStorySection",
@@ -34,7 +34,7 @@
       "category": "section",
       "importHint": "Import into Framer as a standard page section",
       "fileSize": 2726,
-      "updatedAt": "2026-04-09T08:42:37.018Z"
+      "updatedAt": "2026-04-17T05:07:14.130Z"
     },
     {
       "id": "HomeFooterSection",
@@ -46,7 +46,7 @@
       "category": "footer",
       "importHint": "Import into Framer near end of page",
       "fileSize": 2663,
-      "updatedAt": "2026-04-09T08:42:37.019Z"
+      "updatedAt": "2026-04-17T05:07:14.130Z"
     }
   ]
 }

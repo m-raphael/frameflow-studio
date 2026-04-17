@@ -4,5 +4,8 @@
   "modes": [
     "canvas"
   ],
+  "permissions": [
+    "addComponentInstance"
+  ],
   "icon": "/icon.svg"
 }

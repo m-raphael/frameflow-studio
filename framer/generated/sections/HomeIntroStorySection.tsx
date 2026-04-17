@@ -40,8 +40,8 @@ const designTokens = {
 /**
  * Generated from site-map.json
  * Page: home
- * Section: footer
- * Kind: footer
+ * Section: intro-story
+ * Kind: story
  */
 type Props = {
   title: string
@@ -50,7 +50,7 @@ type Props = {
   textColor: string
 }
 
-export default function HomeFooterSection(props: Props) {
+export default function HomeIntroStorySection(props: Props) {
   return (
     <section
       style={{
@@ -87,7 +87,7 @@ export default function HomeFooterSection(props: Props) {
             background: designTokens.colors.primary
           }}
         />
-        footer
+        story
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: designTokens.spacing.sm }}>
@@ -120,23 +120,23 @@ export default function HomeFooterSection(props: Props) {
   )
 }
 
-HomeFooterSection.defaultProps = {
-  title: "Footer",
-  notes: "Simple but intentional close",
+HomeIntroStorySection.defaultProps = {
+  title: "Intro Story",
+  notes: "Section rhythm matters more than dense content",
   background: designTokens.colors.surface,
   textColor: designTokens.colors.text
 }
 
-addPropertyControls(HomeFooterSection, {
+addPropertyControls(HomeIntroStorySection, {
   title: {
     type: ControlType.String,
     title: "Title",
-    defaultValue: "Footer"
+    defaultValue: "Intro Story"
   },
   notes: {
     type: ControlType.String,
     title: "Notes",
-    defaultValue: "Simple but intentional close"
+    defaultValue: "Section rhythm matters more than dense content"
   },
   background: {
     type: ControlType.Color,
