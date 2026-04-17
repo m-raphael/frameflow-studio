@@ -1,10 +1,10 @@
 # QA Report
 
 ## Project
-- Reference: https://waaark.com/
+- Reference: https://waaark.com
 - Build target: agency
 - Build mode: full
-- Date: 2026-04-17T05:08:32.166Z
+- Date: 2026-04-17T06:38:02.205Z
 - Generator: orchestrator/scripts/build-qa.mjs
 
 ## Summary
@@ -57,7 +57,7 @@
 - [x] At least one section generated
 - [x] All section TSX files exist on disk
 
-### Motion (1 interactions · 1 GSAP · 0 override · 0 native)
+### Motion (5 interactions · 2 GSAP · 1 override · 2 native)
 - [x] At least one motion interaction defined
 - [x] All GSAP component files exist on disk
 - [x] All override files exist on disk

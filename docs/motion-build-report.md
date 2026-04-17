@@ -4,10 +4,11 @@
 - framer/generated/motion/motion-decisions.generated.json
 
 ## Generated override files
-- None
+- framer/generated/overrides/WorkCardHoverOverride.tsx
 
 ## Generated GSAP component files
-- framer/generated/gsap/HeroTitleRevealMotion.tsx
+- framer/generated/gsap/CursorFollowerMotion.tsx
+- framer/generated/gsap/StoryRevealMotion.tsx
 - framer/generated/gsap/CursorFollower.tsx
 
 ## Notes

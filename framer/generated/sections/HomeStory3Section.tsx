@@ -6,50 +6,50 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * Generated from site-map.json · intro-story · kind: story
- * Section rhythm matters more than dense content
+ * Generated from site-map.json · story-3 · kind: story
+ * Strong rhythm, large display numbers, restrained body copy, purposeful whitespace
  */
 
 const tokens = {
-    "themeName": "frameflow-default",
+    "themeName": "waaark-com",
     "fonts": {
       "display": "Inter",
       "body": "Inter"
     },
     "colors": {
-      "background": "#0B0B0B",
+      "background": "#0a0a0a",
       "surface": "#111111",
       "surface2": "#171717",
-      "text": "#F5F5F0",
-      "muted": "#B8B8B0",
-      "primary": "#D6FF3F",
+      "text": "#f5f5f0",
+      "muted": "#b8b8b0",
+      "primary": "#d6ff3f",
       "border": "rgba(255,255,255,0.08)"
     },
     "radius": {
-      "sm": 8,
-      "md": 14,
-      "lg": 24
+      "sm": 4,
+      "md": 10,
+      "lg": 20
     },
     "spacing": {
       "xs": 4,
       "sm": 8,
       "md": 16,
       "lg": 24,
-      "xl": 40,
-      "xxl": 80
+      "xl": 48,
+      "xxl": 96
     },
     "motion": {
-      "easePrimary": "power3.out",
-      "durationFast": 0.35,
-      "durationBase": 0.7,
-      "durationSlow": 1.2
+      "easePrimary": "power4.out",
+      "durationFast": 0.4,
+      "durationBase": 0.95,
+      "durationSlow": 1.5
     },
     "siteStyle": {
       "textAlign": "left",
       "heroStyle": "text-only",
       "galleryStyle": "list",
       "animationTempo": "cinematic",
-      "displayFontSize": "clamp(52px, 9vw, 130px)",
+      "displayFontSize": "clamp(44px, 7.1vw, 100px)",
       "bodyFontSize": "16px",
       "letterSpacing": "-0.04em",
       "borderRadius": "0px",
@@ -67,7 +67,7 @@ type Props = {
   textColor: string
 }
 
-export default function HomeIntroStorySection({ sectionLabel, counter, headline, body, background, textColor }: Props) {
+export default function HomeStory3Section({ sectionLabel, counter, headline, body, background, textColor }: Props) {
   const rootRef = React.useRef<HTMLElement | null>(null)
 
   React.useLayoutEffect(() => {
@@ -180,7 +180,7 @@ export default function HomeIntroStorySection({ sectionLabel, counter, headline,
   )
 }
 
-HomeIntroStorySection.defaultProps = {
+HomeStory3Section.defaultProps = {
   sectionLabel: "Studio",
   counter: "01",
   headline: "We believe that design shapes the way the world thinks.",
@@ -189,7 +189,7 @@ HomeIntroStorySection.defaultProps = {
   textColor: tokens.colors.text
 }
 
-addPropertyControls(HomeIntroStorySection, {
+addPropertyControls(HomeStory3Section, {
   sectionLabel: { type: ControlType.String, title: "Label",    defaultValue: "Studio" },
   counter:      { type: ControlType.String, title: "Counter",  defaultValue: "01" },
   headline:     { type: ControlType.String, title: "Headline", defaultValue: "We believe that design shapes the way the world thinks." },

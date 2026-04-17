@@ -1,12 +1,52 @@
 {
   "source": "orchestrator/output/motion-map.json",
-  "generatedAt": "2026-04-17T05:08:26.579Z",
+  "generatedAt": "2026-04-17T06:38:00.471Z",
   "interactions": [
     {
       "id": "hero-title-reveal",
-      "kind": "scroll",
+      "kind": "load",
       "target": "heroTitle",
-      "trigger": "heroSection",
+      "trigger": "mount",
+      "implementation": "native-framer",
+      "reason": "This interaction can likely be represented using Framer-first motion features.",
+      "reducedMotionFallback": "static visible state",
+      "mobileFallback": "same behavior with simplified easing"
+    },
+    {
+      "id": "work-cards-reveal",
+      "kind": "scroll",
+      "target": "workCards",
+      "trigger": "workSection",
+      "implementation": "native-framer",
+      "reason": "This interaction can likely be represented using Framer-first motion features.",
+      "reducedMotionFallback": "static visible state",
+      "mobileFallback": "same behavior with simplified easing"
+    },
+    {
+      "id": "work-card-hover",
+      "kind": "hover",
+      "target": "workCard",
+      "trigger": "mouseenter",
+      "implementation": "override",
+      "reason": "Simple hover behaviors fit lightweight Framer overrides well.",
+      "reducedMotionFallback": "static hover styling",
+      "mobileFallback": "no hover effect"
+    },
+    {
+      "id": "cursor-follower",
+      "kind": "cursor",
+      "target": "customCursor",
+      "trigger": "document",
+      "implementation": "gsap-code-component",
+      "reason": "Premium cursor-linked interactions need fine-grained pointer interpolation.",
+      "reducedMotionFallback": "no cursor motion",
+      "mobileFallback": "disabled"
+    },
+    {
+      "id": "story-reveal",
+      "kind": "scroll",
+      "target": "storyText",
+      "trigger": "storySection",
       "implementation": "gsap-code-component",
       "reason": "Scroll-linked interactions with scrub or pin are better handled with GSAP timelines and ScrollTrigger.",
       "reducedMotionFallback": "static visible state",

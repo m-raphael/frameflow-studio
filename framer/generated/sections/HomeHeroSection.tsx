@@ -1,151 +1,208 @@
 import * as React from "react"
 import { addPropertyControls, ControlType } from "framer"
+import gsap from "gsap"
 
-const designTokens = {
-    "themeName": "frameflow-default",
+/**
+ * Generated from site-map.json · hero · kind: hero
+ * Large kinetic display type, bottom-anchored layout, immediate cinematic impact
+ */
+
+const tokens = {
+    "themeName": "waaark-com",
     "fonts": {
       "display": "Inter",
       "body": "Inter"
     },
     "colors": {
-      "background": "#0B0B0B",
+      "background": "#0a0a0a",
       "surface": "#111111",
       "surface2": "#171717",
-      "text": "#F5F5F0",
-      "muted": "#B8B8B0",
-      "primary": "#D6FF3F",
+      "text": "#f5f5f0",
+      "muted": "#b8b8b0",
+      "primary": "#d6ff3f",
       "border": "rgba(255,255,255,0.08)"
     },
     "radius": {
-      "sm": 8,
-      "md": 14,
-      "lg": 24
+      "sm": 4,
+      "md": 10,
+      "lg": 20
     },
     "spacing": {
       "xs": 4,
       "sm": 8,
       "md": 16,
       "lg": 24,
-      "xl": 40,
-      "xxl": 80
+      "xl": 48,
+      "xxl": 96
     },
     "motion": {
-      "easePrimary": "power3.out",
-      "durationFast": 0.35,
-      "durationBase": 0.7,
-      "durationSlow": 1.2
+      "easePrimary": "power4.out",
+      "durationFast": 0.4,
+      "durationBase": 0.95,
+      "durationSlow": 1.5
+    },
+    "siteStyle": {
+      "textAlign": "left",
+      "heroStyle": "text-only",
+      "galleryStyle": "list",
+      "animationTempo": "cinematic",
+      "displayFontSize": "clamp(44px, 7.1vw, 100px)",
+      "bodyFontSize": "16px",
+      "letterSpacing": "-0.04em",
+      "borderRadius": "0px",
+      "hasMarquee": false,
+      "hasMagneticCursor": true
     }
   }
 
-/**
- * Generated from site-map.json
- * Page: home
- * Section: hero
- * Kind: hero
- */
+function CharSplit({ text }: { text: string }) {
+  return (
+    <>
+      {text.split("").map((char, i) => (
+        <span
+          key={i}
+          data-char-wrap
+          style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
+        >
+          <span data-char style={{ display: "inline-block" }}>
+            {char === " " ? "\u00A0" : char}
+          </span>
+        </span>
+      ))}
+    </>
+  )
+}
+
 type Props = {
-  title: string
-  notes: string
+  label: string
+  headline: string
+  subheadline: string
   background: string
   textColor: string
 }
 
-export default function HomeHeroSection(props: Props) {
+export default function HomeHeroSection({ label, headline, subheadline, background, textColor }: Props) {
+  const rootRef = React.useRef<HTMLElement | null>(null)
+
+  React.useLayoutEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+    const ctx = gsap.context(() => {
+      const chars  = el.querySelectorAll("[data-char]")
+      const labelEl = el.querySelector("[data-label]")
+      const subEl   = el.querySelector("[data-sub]")
+
+      if (prefersReducedMotion) {
+        gsap.set([chars, labelEl, subEl], { opacity: 1, y: 0 })
+        return
+      }
+
+      gsap.set(chars,   { y: "110%", opacity: 0 })
+      gsap.set(labelEl, { opacity: 0, y: 14 })
+      gsap.set(subEl,   { opacity: 0, y: 20 })
+
+      const tl = gsap.timeline({ delay: 0.08 })
+      tl.to(labelEl, { opacity: 1, y: 0, duration: 0.58, ease: "power2.out" })
+        .to(chars,   { y: "0%", opacity: 1, duration: 1.05, ease: "power4.out", stagger: 0.018 }, "-=0.15")
+        .to(subEl,   { opacity: 1, y: 0,    duration: 0.73, ease: "power2.out" }, `-=${1.05 * 0.5}`)
+    }, el)
+
+    return () => ctx.revert()
+  }, [headline])
+
   return (
     <section
+      ref={rootRef}
       style={{
         width: "100%",
-        height: "100%",
-        boxSizing: "border-box",
+        height: "100vh",
+        minHeight: 640,
+        background,
+        color: textColor,
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        gap: designTokens.spacing.md,
-        padding: designTokens.spacing.xl,
-        borderRadius: designTokens.radius.lg,
-        background: props.background,
-        color: props.textColor,
-        border: `1px solid ${designTokens.colors.border}`
+        justifyContent: "flex-end",
+        alignItems: "flex-start",
+        textAlign: "left",
+        padding: `${tokens.spacing.xxl}px`,
+        paddingBottom: `${tokens.spacing.xl}px`,
+        boxSizing: "border-box",
+        overflow: "hidden",
+        fontFamily: tokens.fonts.body
       }}
     >
       <div
+        data-label
         style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: 10,
-          fontSize: 12,
-          letterSpacing: "0.08em",
+          gap: 8,
+          fontSize: 11,
+          letterSpacing: "0.15em",
           textTransform: "uppercase",
-          opacity: 0.7
+          opacity: 0.45,
+          marginBottom: tokens.spacing.lg,
+          
         }}
       >
         <span
           style={{
-            width: 8,
-            height: 8,
+            width: 5,
+            height: 5,
             borderRadius: 999,
-            background: designTokens.colors.primary
+            background: tokens.colors.primary,
+            display: "inline-block",
+            flexShrink: 0
           }}
         />
-        hero
+        {label}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: designTokens.spacing.sm }}>
-        <h2
-          style={{
-            margin: 0,
-            fontFamily: designTokens.fonts.display,
-            fontSize: "clamp(32px, 6vw, 72px)",
-            lineHeight: 0.95,
-            letterSpacing: "-0.05em"
-          }}
-        >
-          {props.title}
-        </h2>
+      <h1
+        style={{
+          margin: 0,
+          fontFamily: tokens.fonts.display,
+          fontSize: "clamp(44px, 7.1vw, 100px)",
+          lineHeight: 0.9,
+          letterSpacing: "-0.04em",
+          fontWeight: 700
+        }}
+      >
+        <CharSplit text={headline} />
+      </h1>
 
-        <p
-          style={{
-            margin: 0,
-            maxWidth: "42ch",
-            fontFamily: designTokens.fonts.body,
-            fontSize: 16,
-            lineHeight: 1.6,
-            opacity: 0.82
-          }}
-        >
-          {props.notes}
-        </p>
-      </div>
+      <p
+        data-sub
+        style={{
+          margin: `${tokens.spacing.xl}px 0 0`,
+          maxWidth: "38ch",
+          fontFamily: tokens.fonts.body,
+          fontSize: tokens.siteStyle.bodyFontSize,
+          lineHeight: 1.68,
+          opacity: 0.62,
+          
+        }}
+      >
+        {subheadline}
+      </p>
     </section>
   )
 }
 
 HomeHeroSection.defaultProps = {
-  title: "Hero",
-  notes: "Large display text, dark stage, immediate kinetic impact",
-  background: designTokens.colors.surface,
-  textColor: designTokens.colors.text
+  label: "Creative Studio",
+  headline: "We craft digital experiences",
+  subheadline: "Full-cycle design and development for ambitious brands.",
+  background: tokens.colors.background,
+  textColor: tokens.colors.text
 }
 
 addPropertyControls(HomeHeroSection, {
-  title: {
-    type: ControlType.String,
-    title: "Title",
-    defaultValue: "Hero"
-  },
-  notes: {
-    type: ControlType.String,
-    title: "Notes",
-    defaultValue: "Large display text, dark stage, immediate kinetic impact"
-  },
-  background: {
-    type: ControlType.Color,
-    title: "Background",
-    defaultValue: designTokens.colors.surface
-  },
-  textColor: {
-    type: ControlType.Color,
-    title: "Text",
-    defaultValue: designTokens.colors.text
-  }
+  label:       { type: ControlType.String, title: "Label",       defaultValue: "Creative Studio" },
+  headline:    { type: ControlType.String, title: "Headline",    defaultValue: "We craft digital experiences" },
+  subheadline: { type: ControlType.String, title: "Subheadline", defaultValue: "Full-cycle design and development for ambitious brands." },
+  background:  { type: ControlType.Color,  title: "Background",  defaultValue: tokens.colors.background },
+  textColor:   { type: ControlType.Color,  title: "Text",        defaultValue: tokens.colors.text },
 })

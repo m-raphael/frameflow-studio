@@ -1,6 +1,11 @@
 {
-  "siteName": "Waaark-inspired Studio",
+  "siteName": "waaark.com",
+  "referenceUrl": "https://waaark.com",
   "referenceType": "url",
+  "analyzedAt": "2026-04-17T06:37:54.557Z",
+  "motionLibraries": [
+    "gsap"
+  ],
   "pages": [
     {
       "id": "home",
@@ -10,26 +15,26 @@
         {
           "id": "hero",
           "kind": "hero",
-          "layout": "full-height centered headline with layered intro motion",
-          "notes": "Large display text, dark stage, immediate kinetic impact"
+          "layout": "full-height dark stage with staggered character reveal",
+          "notes": "Large kinetic display type, bottom-anchored layout, immediate cinematic impact"
         },
         {
-          "id": "intro-story",
-          "kind": "story",
-          "layout": "stacked editorial blocks with scroll-linked transitions",
-          "notes": "Section rhythm matters more than dense content"
-        },
-        {
-          "id": "selected-work",
+          "id": "gallery-2",
           "kind": "gallery",
-          "layout": "tall visual cards with cinematic spacing",
-          "notes": "Hover states should feel premium and subtle"
+          "layout": "stacked project cards with scroll-linked reveals",
+          "notes": "Premium cinematic card entries, hover reveals secondary info, numbered list"
         },
         {
-          "id": "footer",
+          "id": "story-3",
+          "kind": "story",
+          "layout": "editorial split blocks with scroll-linked opacity",
+          "notes": "Strong rhythm, large display numbers, restrained body copy, purposeful whitespace"
+        },
+        {
+          "id": "footer-4",
           "kind": "footer",
-          "layout": "minimal outro with strong typography",
-          "notes": "Simple but intentional close"
+          "layout": "minimal outro with strong typography and scroll reveal",
+          "notes": "Simple intentional close, copyright and social links"
         }
       ]
     }

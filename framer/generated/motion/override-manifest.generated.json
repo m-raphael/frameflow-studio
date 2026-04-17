@@ -1,4 +1,10 @@
 {
-  "generatedAt": "2026-04-17T05:08:26.580Z",
-  "overrides": []
+  "generatedAt": "2026-04-17T06:38:00.472Z",
+  "overrides": [
+    {
+      "id": "work-card-hover",
+      "suggestedFile": "framer/overrides/withMagneticHover.tsx",
+      "reason": "Simple hover behaviors fit lightweight Framer overrides well."
+    }
+  ]
 }

@@ -6,50 +6,50 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * Generated from site-map.json · footer · kind: footer
- * Simple but intentional close
+ * Generated from site-map.json · footer-4 · kind: footer
+ * Simple intentional close, copyright and social links
  */
 
 const tokens = {
-    "themeName": "frameflow-default",
+    "themeName": "waaark-com",
     "fonts": {
       "display": "Inter",
       "body": "Inter"
     },
     "colors": {
-      "background": "#0B0B0B",
+      "background": "#0a0a0a",
       "surface": "#111111",
       "surface2": "#171717",
-      "text": "#F5F5F0",
-      "muted": "#B8B8B0",
-      "primary": "#D6FF3F",
+      "text": "#f5f5f0",
+      "muted": "#b8b8b0",
+      "primary": "#d6ff3f",
       "border": "rgba(255,255,255,0.08)"
     },
     "radius": {
-      "sm": 8,
-      "md": 14,
-      "lg": 24
+      "sm": 4,
+      "md": 10,
+      "lg": 20
     },
     "spacing": {
       "xs": 4,
       "sm": 8,
       "md": 16,
       "lg": 24,
-      "xl": 40,
-      "xxl": 80
+      "xl": 48,
+      "xxl": 96
     },
     "motion": {
-      "easePrimary": "power3.out",
-      "durationFast": 0.35,
-      "durationBase": 0.7,
-      "durationSlow": 1.2
+      "easePrimary": "power4.out",
+      "durationFast": 0.4,
+      "durationBase": 0.95,
+      "durationSlow": 1.5
     },
     "siteStyle": {
       "textAlign": "left",
       "heroStyle": "text-only",
       "galleryStyle": "list",
       "animationTempo": "cinematic",
-      "displayFontSize": "clamp(52px, 9vw, 130px)",
+      "displayFontSize": "clamp(44px, 7.1vw, 100px)",
       "bodyFontSize": "16px",
       "letterSpacing": "-0.04em",
       "borderRadius": "0px",
@@ -66,7 +66,7 @@ type Props = {
   textColor: string
 }
 
-export default function HomeFooterSection({ studioName, tagline, copyright, background, textColor }: Props) {
+export default function HomeFooter4Section({ studioName, tagline, copyright, background, textColor }: Props) {
   const rootRef = React.useRef<HTMLElement | null>(null)
 
   React.useLayoutEffect(() => {
@@ -114,7 +114,7 @@ export default function HomeFooterSection({ studioName, tagline, copyright, back
         data-wordmark
         style={{
           fontFamily: tokens.fonts.display,
-          fontSize: "clamp(52px, 9vw, 130px)",
+          fontSize: "clamp(44px, 7.1vw, 100px)",
           fontWeight: 700,
           letterSpacing: "-0.04em",
           lineHeight: 0.88,
@@ -146,7 +146,7 @@ export default function HomeFooterSection({ studioName, tagline, copyright, back
   )
 }
 
-HomeFooterSection.defaultProps = {
+HomeFooter4Section.defaultProps = {
   studioName: "Studio",
   tagline: "Design & development for ambitious brands",
   copyright: `© ${new Date().getFullYear()} All rights reserved`,
@@ -154,7 +154,7 @@ HomeFooterSection.defaultProps = {
   textColor: tokens.colors.text
 }
 
-addPropertyControls(HomeFooterSection, {
+addPropertyControls(HomeFooter4Section, {
   studioName: { type: ControlType.String, title: "Studio Name", defaultValue: "Studio" },
   tagline:    { type: ControlType.String, title: "Tagline",     defaultValue: "Design & development" },
   copyright:  { type: ControlType.String, title: "Copyright",   defaultValue: "© 2024 All rights reserved" },

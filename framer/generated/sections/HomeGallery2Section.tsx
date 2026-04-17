@@ -6,50 +6,50 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * Generated from site-map.json · selected-work · kind: gallery (list)
- * Hover states should feel premium and subtle
+ * Generated from site-map.json · gallery-2 · kind: gallery (list)
+ * Premium cinematic card entries, hover reveals secondary info, numbered list
  */
 
 const tokens = {
-    "themeName": "frameflow-default",
+    "themeName": "waaark-com",
     "fonts": {
       "display": "Inter",
       "body": "Inter"
     },
     "colors": {
-      "background": "#0B0B0B",
+      "background": "#0a0a0a",
       "surface": "#111111",
       "surface2": "#171717",
-      "text": "#F5F5F0",
-      "muted": "#B8B8B0",
-      "primary": "#D6FF3F",
+      "text": "#f5f5f0",
+      "muted": "#b8b8b0",
+      "primary": "#d6ff3f",
       "border": "rgba(255,255,255,0.08)"
     },
     "radius": {
-      "sm": 8,
-      "md": 14,
-      "lg": 24
+      "sm": 4,
+      "md": 10,
+      "lg": 20
     },
     "spacing": {
       "xs": 4,
       "sm": 8,
       "md": 16,
       "lg": 24,
-      "xl": 40,
-      "xxl": 80
+      "xl": 48,
+      "xxl": 96
     },
     "motion": {
-      "easePrimary": "power3.out",
-      "durationFast": 0.35,
-      "durationBase": 0.7,
-      "durationSlow": 1.2
+      "easePrimary": "power4.out",
+      "durationFast": 0.4,
+      "durationBase": 0.95,
+      "durationSlow": 1.5
     },
     "siteStyle": {
       "textAlign": "left",
       "heroStyle": "text-only",
       "galleryStyle": "list",
       "animationTempo": "cinematic",
-      "displayFontSize": "clamp(52px, 9vw, 130px)",
+      "displayFontSize": "clamp(44px, 7.1vw, 100px)",
       "bodyFontSize": "16px",
       "letterSpacing": "-0.04em",
       "borderRadius": "0px",
@@ -73,7 +73,7 @@ type Props = {
   accentColor: string
 }
 
-export default function HomeSelectedWorkSection({ sectionLabel, background, textColor, accentColor }: Props) {
+export default function HomeGallery2Section({ sectionLabel, background, textColor, accentColor }: Props) {
   const rootRef = React.useRef<HTMLElement | null>(null)
 
   React.useLayoutEffect(() => {
@@ -196,14 +196,14 @@ export default function HomeSelectedWorkSection({ sectionLabel, background, text
   )
 }
 
-HomeSelectedWorkSection.defaultProps = {
+HomeGallery2Section.defaultProps = {
   sectionLabel: "Selected Work",
   background: tokens.colors.background,
   textColor: tokens.colors.text,
   accentColor: tokens.colors.primary
 }
 
-addPropertyControls(HomeSelectedWorkSection, {
+addPropertyControls(HomeGallery2Section, {
   sectionLabel: { type: ControlType.String, title: "Label",      defaultValue: "Selected Work" },
   background:   { type: ControlType.Color,  title: "Background", defaultValue: tokens.colors.background },
   textColor:    { type: ControlType.Color,  title: "Text",       defaultValue: tokens.colors.text },

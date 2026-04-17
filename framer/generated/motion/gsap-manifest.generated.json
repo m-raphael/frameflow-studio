@@ -1,8 +1,13 @@
 {
-  "generatedAt": "2026-04-17T05:08:26.581Z",
+  "generatedAt": "2026-04-17T06:38:00.473Z",
   "components": [
     {
-      "id": "hero-title-reveal",
+      "id": "cursor-follower",
+      "suggestedPattern": "pointer-reactive glow/parallax component",
+      "reason": "Premium cursor-linked interactions need fine-grained pointer interpolation."
+    },
+    {
+      "id": "story-reveal",
       "suggestedPattern": "ScrollTrigger timeline component",
       "reason": "Scroll-linked interactions with scrub or pin are better handled with GSAP timelines and ScrollTrigger."
     }

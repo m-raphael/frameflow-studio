@@ -1,35 +1,47 @@
 export const designTokens = {
-  "themeName": "frameflow-default",
+  "themeName": "waaark-com",
   "fonts": {
     "display": "Inter",
     "body": "Inter"
   },
   "colors": {
-    "background": "#0B0B0B",
+    "background": "#0a0a0a",
     "surface": "#111111",
     "surface2": "#171717",
-    "text": "#F5F5F0",
-    "muted": "#B8B8B0",
-    "primary": "#D6FF3F",
+    "text": "#f5f5f0",
+    "muted": "#b8b8b0",
+    "primary": "#d6ff3f",
     "border": "rgba(255,255,255,0.08)"
   },
   "radius": {
-    "sm": 8,
-    "md": 14,
-    "lg": 24
+    "sm": 4,
+    "md": 10,
+    "lg": 20
   },
   "spacing": {
     "xs": 4,
     "sm": 8,
     "md": 16,
     "lg": 24,
-    "xl": 40,
-    "xxl": 80
+    "xl": 48,
+    "xxl": 96
   },
   "motion": {
-    "easePrimary": "power3.out",
-    "durationFast": 0.35,
-    "durationBase": 0.7,
-    "durationSlow": 1.2
+    "easePrimary": "power4.out",
+    "durationFast": 0.4,
+    "durationBase": 0.95,
+    "durationSlow": 1.5
+  },
+  "siteStyle": {
+    "textAlign": "left",
+    "heroStyle": "text-only",
+    "galleryStyle": "list",
+    "animationTempo": "cinematic",
+    "displayFontSize": "clamp(44px, 7.1vw, 100px)",
+    "bodyFontSize": "16px",
+    "letterSpacing": "-0.04em",
+    "borderRadius": "0px",
+    "hasMarquee": false,
+    "hasMagneticCursor": true
   }
 } as const;
