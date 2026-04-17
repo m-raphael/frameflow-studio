@@ -195,6 +195,73 @@ function detectMotionLibraries(html) {
   return libs
 }
 
+// ─── site style extraction ───────────────────────────────────────────────────
+
+function extractTypographyScale(css) {
+  const sizes = new Set()
+  for (const m of css.matchAll(/font-size:\s*(\d+(?:\.\d+)?)(px|rem)/g)) {
+    const px = m[2] === "rem" ? parseFloat(m[1]) * 16 : parseFloat(m[1])
+    if (px >= 10 && px <= 320) sizes.add(Math.round(px))
+  }
+  return [...sizes].sort((a, b) => b - a)
+}
+
+function extractAnimationTempo(css) {
+  const durations = []
+  for (const m of css.matchAll(/(?:transition|animation)[^;:{]*?(\d+(?:\.\d+)?)(ms|s)/g)) {
+    const ms = m[2] === "ms" ? parseFloat(m[1]) : parseFloat(m[1]) * 1000
+    if (ms >= 80 && ms <= 4000) durations.push(ms)
+  }
+  if (!durations.length) return "cinematic"
+  const avg = durations.reduce((a, b) => a + b, 0) / durations.length
+  return avg < 350 ? "fast" : avg < 750 ? "base" : "cinematic"
+}
+
+function extractDisplayLetterSpacing(css) {
+  const candidates = []
+  for (const m of css.matchAll(/letter-spacing:\s*(-?\d+(?:\.\d+)?)(em|px)/g)) {
+    const val = parseFloat(m[1])
+    if (val < 0) candidates.push(`${m[1]}${m[2]}`)
+  }
+  if (!candidates.length) return "-0.04em"
+  const freq = new Map()
+  for (const c of candidates) freq.set(c, (freq.get(c) || 0) + 1)
+  return [...freq.entries()].sort((a, b) => b[1] - a[1])[0][0]
+}
+
+function extractTextAlign(css) {
+  const center = (css.match(/text-align:\s*center/g) || []).length
+  const left = (css.match(/text-align:\s*left/g) || []).length
+  return center > left * 1.5 ? "center" : "left"
+}
+
+function extractGalleryStyle(css) {
+  if (/grid-template-columns[^;]*repeat\s*\(\s*[234]/.test(css)) return "grid"
+  if (/columns:\s*\d/.test(css)) return "masonry"
+  return "list"
+}
+
+function extractBorderRadius(css) {
+  const radii = []
+  for (const m of css.matchAll(/border-radius:\s*(\d+)px/g)) {
+    const v = parseInt(m[1])
+    if (v > 0 && v < 200) radii.push(v)
+  }
+  if (!radii.length) return "0px"
+  const avg = radii.reduce((a, b) => a + b, 0) / radii.length
+  return avg < 4 ? "0px" : avg < 10 ? "4px" : avg < 20 ? "12px" : "24px"
+}
+
+function detectHeroStyle(html) {
+  if (/<video[^>]*(?:autoplay|muted)[^>]*>/i.test(html)) return "video-bg"
+  if (/background-image[^;]*url\s*\(/i.test(html)) return "text-image"
+  return "text-only"
+}
+
+function detectHasMarquee(html, css) {
+  return /marquee|ticker|running-text|data-scroll.*speed|js-marquee/i.test(html + css)
+}
+
 // ─── section detection ────────────────────────────────────────────────────────
 
 function detectSections(html, referenceStyle) {
@@ -284,8 +351,31 @@ async function analyze() {
   const colors = classifyColors(allCss, cssVars)
 
   const motionLibs = html ? detectMotionLibraries(html) : ["gsap"]
-  const hasGsap = motionLibs.includes("gsap") || motionLibs.includes("locomotive-scroll") || true // always use gsap
+  const hasGsap = motionLibs.includes("gsap") || motionLibs.includes("locomotive-scroll") || true
   const hasCursor = motionLibs.includes("custom-cursor") || motionLibs.includes("gsap")
+
+  // ─── site style (layout, typography scale, animation character) ──────────────
+  const fontSizeScale = extractTypographyScale(allCss)
+  const topDisplayPx = fontSizeScale[0] || 100
+  const displayFontSize = `clamp(${Math.max(38, Math.round(topDisplayPx * 0.44))}px, ${(topDisplayPx / 14).toFixed(1)}vw, ${topDisplayPx}px)`
+  const bodyFontPx = fontSizeScale.filter(s => s >= 14 && s <= 20)[0] || 16
+
+  const siteStyle = {
+    textAlign: extractTextAlign(allCss),
+    heroStyle: detectHeroStyle(html || ""),
+    galleryStyle: extractGalleryStyle(allCss),
+    animationTempo: extractAnimationTempo(allCss),
+    displayFontSize,
+    bodyFontSize: `${bodyFontPx}px`,
+    letterSpacing: extractDisplayLetterSpacing(allCss),
+    borderRadius: extractBorderRadius(allCss),
+    hasMarquee: detectHasMarquee(html || "", allCss),
+    hasMagneticCursor: hasCursor
+  }
+
+  console.log(`  Layout — align:${siteStyle.textAlign} hero:${siteStyle.heroStyle} gallery:${siteStyle.galleryStyle}`)
+  console.log(`  Type — display:${displayFontSize} body:${siteStyle.bodyFontSize} spacing:${siteStyle.letterSpacing}`)
+  console.log(`  Animation tempo: ${siteStyle.animationTempo} | radius: ${siteStyle.borderRadius} | marquee: ${siteStyle.hasMarquee}`)
 
   const referenceStyle = request.referenceStyle || "agency"
   const detectedSections = detectSections(html || "", referenceStyle)
@@ -301,13 +391,14 @@ async function analyze() {
     themeName: new NodeURL(referenceUrl).hostname.replace(/^www\./, "").replace(/\./g, "-"),
     fonts: { display: displayFont, body: bodyFont },
     colors,
+    siteStyle,
     radius: { sm: 4, md: 10, lg: 20 },
     spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 48, xxl: 96 },
     motion: {
       easePrimary: hasGsap ? "power4.out" : "cubic-bezier(0.22, 1, 0.36, 1)",
-      durationFast: 0.4,
-      durationBase: 0.85,
-      durationSlow: 1.4
+      durationFast: siteStyle.animationTempo === "fast" ? 0.3 : 0.4,
+      durationBase: siteStyle.animationTempo === "fast" ? 0.55 : siteStyle.animationTempo === "base" ? 0.75 : 0.95,
+      durationSlow: siteStyle.animationTempo === "fast" ? 0.8 : siteStyle.animationTempo === "base" ? 1.1 : 1.5
     }
   }
 

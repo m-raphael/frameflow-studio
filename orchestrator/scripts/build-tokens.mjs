@@ -42,6 +42,18 @@ const normalized = {
     durationFast: tokens.motion?.durationFast ?? 0.35,
     durationBase: tokens.motion?.durationBase ?? 0.7,
     durationSlow: tokens.motion?.durationSlow ?? 1.2
+  },
+  siteStyle: {
+    textAlign: tokens.siteStyle?.textAlign ?? "left",
+    heroStyle: tokens.siteStyle?.heroStyle ?? "text-only",
+    galleryStyle: tokens.siteStyle?.galleryStyle ?? "list",
+    animationTempo: tokens.siteStyle?.animationTempo ?? "cinematic",
+    displayFontSize: tokens.siteStyle?.displayFontSize ?? "clamp(52px, 9vw, 130px)",
+    bodyFontSize: tokens.siteStyle?.bodyFontSize ?? "16px",
+    letterSpacing: tokens.siteStyle?.letterSpacing ?? "-0.04em",
+    borderRadius: tokens.siteStyle?.borderRadius ?? "0px",
+    hasMarquee: tokens.siteStyle?.hasMarquee ?? false,
+    hasMagneticCursor: tokens.siteStyle?.hasMagneticCursor ?? true
   }
 }
 
