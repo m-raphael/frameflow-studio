@@ -32,3 +32,6 @@ setup_claude.sh
 .claude/settings.local.json
 CLAUDE.local.md
 .claude/skills/
+
+# Private design references
+DESIGN.md

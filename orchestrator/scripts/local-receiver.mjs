@@ -12,73 +12,140 @@ const HTML_UI = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Frameflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
   :root {
-    --bg: #0B0B0B; --surface: #111; --surface2: #171717;
-    --border: rgba(255,255,255,0.08); --text: #F5F5F0; --muted: #888;
-    --accent: #D6FF3F; --red: #FF4D4D; --radius: 10px;
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --bg:      #000000;
+    --text:    #ffffff;
+    --muted:   #a6a6a6;
+    --blue:    #0099ff;
+    --blue-ring: rgba(0,153,255,0.15);
+    --frosted: rgba(255,255,255,0.1);
+    --frosted-hover: rgba(255,255,255,0.14);
+    --red:     #ff4444;
+    --green:   #34d399;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 80px }
-  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.03em; margin-bottom: 8px }
-  .sub { font-size: 13px; color: var(--muted); margin-bottom: 40px }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 640px; margin-bottom: 20px }
-  .row { display: flex; gap: 10px }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    font-feature-settings: "cv01","cv05","cv09","cv11","ss03","ss07";
+    letter-spacing: -0.15px;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 64px 24px 96px;
+  }
+  .wordmark {
+    font-size: 13px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 48px;
+  }
+  .headline { font-size: 28px; font-weight: 600; letter-spacing: -0.6px; line-height: 1.1; margin-bottom: 8px; text-align: center }
+  .sub { font-size: 14px; color: var(--muted); margin-bottom: 40px; text-align: center; line-height: 1.5 }
+
+  /* ── Card ── */
+  .card {
+    background: #000;
+    box-shadow: var(--blue-ring) 0 0 0 1px, rgba(255,255,255,0.05) 0 0.5px 0 0.5px;
+    border-radius: 12px; padding: 24px;
+    width: 100%; max-width: 600px; margin-bottom: 16px;
+  }
+
+  /* ── Input row ── */
+  .row { display: flex; gap: 8px }
   input[type=url] {
-    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 11px 14px; font-size: 14px; color: var(--text); outline: none;
-    transition: border-color 0.2s
+    flex: 1;
+    background: var(--frosted);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 40px;
+    padding: 11px 18px;
+    font-size: 14px; font-family: var(--font);
+    font-feature-settings: "cv01","cv11";
+    color: var(--text); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  input[type=url]:focus { border-color: rgba(255,255,255,0.25) }
-  input[type=url]::placeholder { color: var(--muted) }
-  button {
-    background: var(--accent); color: #0B0B0B; border: none; border-radius: 8px;
-    padding: 11px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
-    white-space: nowrap; transition: opacity 0.15s
+  input[type=url]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 1px var(--blue);
   }
-  button:hover { opacity: 0.88 }
-  button:disabled { opacity: 0.4; cursor: not-allowed }
-  .status-row { display: flex; align-items: center; gap: 10px; margin-top: 18px; min-height: 24px }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0 }
-  .dot.idle    { background: var(--muted) }
-  .dot.running { background: var(--accent); animation: pulse 1s infinite }
-  .dot.success { background: #4ADE80 }
+  input[type=url]::placeholder { color: rgba(255,255,255,0.35) }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: #fff; color: #000; border: none; border-radius: 40px;
+    padding: 11px 22px; font-size: 14px; font-weight: 600; font-family: var(--font);
+    cursor: pointer; white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88 }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed }
+
+  /* ── Status ── */
+  .status-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; min-height: 22px }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0 }
+  .dot.idle    { background: rgba(255,255,255,0.2) }
+  .dot.running { background: var(--blue); animation: pulse 1.1s infinite }
+  .dot.success { background: var(--green) }
   .dot.failed  { background: var(--red) }
-  .dot.queued  { background: #FACC15; animation: pulse 1s infinite }
-  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.35 } }
+  .dot.queued  { background: #facc15; animation: pulse 1.1s infinite }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.25 } }
   .status-msg { font-size: 13px; color: var(--muted) }
-  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px }
-  .file-list { display: flex; flex-direction: column; gap: 6px }
-  .file-item { display: flex; align-items: center; justify-content: space-between; background: var(--surface2); border-radius: 6px; padding: 9px 12px; font-size: 12px; font-family: monospace }
+
+  /* ── Section labels ── */
+  .label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+  }
+
+  /* ── File rows ── */
+  .file-list { display: flex; flex-direction: column; gap: 5px }
+  .file-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--frosted); border-radius: 8px;
+    padding: 8px 12px; font-size: 12px;
+    font-family: "SF Mono", "Fira Mono", ui-monospace, monospace;
+    letter-spacing: 0;
+  }
   .file-item .name { color: var(--text) }
-  .badge { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase }
-  .badge.ready   { background: rgba(74,222,128,0.15); color: #4ADE80 }
-  .badge.gen     { background: rgba(214,255,63,0.12); color: var(--accent) }
-  .badge.missing { background: rgba(255,77,77,0.12); color: var(--red) }
-  .empty { font-size: 13px; color: var(--muted); padding: 8px 0 }
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 20px 0 }
+
+  /* ── Badges ── */
+  .badge {
+    font-size: 10px; font-weight: 600; font-family: var(--font);
+    letter-spacing: 0.06em; padding: 2px 8px; border-radius: 40px;
+    text-transform: uppercase;
+  }
+  .badge.ready   { background: rgba(52,211,153,0.15);  color: var(--green) }
+  .badge.gen     { background: rgba(0,153,255,0.12);   color: var(--blue) }
+  .badge.missing { background: rgba(255,68,68,0.12);   color: var(--red) }
+  .empty { font-size: 13px; color: rgba(255,255,255,0.25); padding: 4px 0 }
+
   #artifacts { display: none }
-  #logPanel { display: none }
+  #logPanel  { display: none }
+
+  /* ── Log ── */
   .log-box {
-    background: #080808; border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; font-family: "SF Mono", "Fira Mono", monospace; font-size: 12px;
-    line-height: 1.6; color: #aaa; max-height: 320px; overflow-y: auto;
+    background: #000; border-radius: 8px;
+    padding: 12px 14px;
+    font-family: "SF Mono", "Fira Mono", ui-monospace, monospace;
+    font-size: 11.5px; line-height: 1.65; color: var(--muted);
+    max-height: 300px; overflow-y: auto;
     white-space: pre-wrap; word-break: break-all;
   }
-  .log-box .ok   { color: #4ADE80 }
+  .log-box .ok   { color: var(--green) }
   .log-box .err  { color: var(--red) }
-  .log-box .warn { color: #FACC15 }
-  .log-box .head { color: var(--text); font-weight: 600 }
+  .log-box .head { color: rgba(255,255,255,0.4) }
 </style>
 </head>
 <body>
-<h1>Frameflow</h1>
-<p class="sub">Paste a reference URL and hit Analyze to generate Framer components</p>
+<div class="wordmark">Frameflow</div>
+<h1 class="headline">Generate Framer components</h1>
+<p class="sub">Paste any reference URL — the pipeline will scan, extract, and build.</p>
 
 <div class="card">
   <div class="row">
     <input id="urlInput" type="url" placeholder="https://example.com" autocomplete="off" spellcheck="false">
-    <button id="analyzeBtn" onclick="submitUrl()">Analyze</button>
+    <button class="btn-primary" id="analyzeBtn" onclick="submitUrl()">Analyze</button>
   </div>
   <div class="status-row">
     <div id="dot" class="dot idle"></div>
@@ -87,14 +154,16 @@ const HTML_UI = `<!DOCTYPE html>
 </div>
 
 <div id="logPanel" class="card">
-  <div class="section-title" style="margin-bottom:10px">Pipeline log</div>
+  <div class="label">Pipeline log</div>
   <div id="logBox" class="log-box"></div>
 </div>
 
 <div id="artifacts" class="card">
   <div id="sectionsBlock"></div>
-  <div id="motionBlock" style="margin-top:20px"></div>
-  <div id="placementsBlock" style="margin-top:20px"></div>
+  <div class="divider"></div>
+  <div id="motionBlock"></div>
+  <div class="divider"></div>
+  <div id="placementsBlock"></div>
 </div>
 
 <script>
