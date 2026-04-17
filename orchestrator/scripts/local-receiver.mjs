@@ -58,6 +58,17 @@ const HTML_UI = `<!DOCTYPE html>
   .badge.missing { background: rgba(255,77,77,0.12); color: var(--red) }
   .empty { font-size: 13px; color: var(--muted); padding: 8px 0 }
   #artifacts { display: none }
+  #logPanel { display: none }
+  .log-box {
+    background: #080808; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; font-family: "SF Mono", "Fira Mono", monospace; font-size: 12px;
+    line-height: 1.6; color: #aaa; max-height: 320px; overflow-y: auto;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .log-box .ok   { color: #4ADE80 }
+  .log-box .err  { color: var(--red) }
+  .log-box .warn { color: #FACC15 }
+  .log-box .head { color: var(--text); font-weight: 600 }
 </style>
 </head>
 <body>
@@ -73,6 +84,11 @@ const HTML_UI = `<!DOCTYPE html>
     <div id="dot" class="dot idle"></div>
     <span id="statusMsg" class="status-msg">Ready</span>
   </div>
+</div>
+
+<div id="logPanel" class="card">
+  <div class="section-title" style="margin-bottom:10px">Pipeline log</div>
+  <div id="logBox" class="log-box"></div>
 </div>
 
 <div id="artifacts" class="card">
@@ -109,18 +125,36 @@ async function submitUrl() {
 
 function startPolling() {
   clearInterval(pollTimer)
+  document.getElementById('logPanel').style.display = 'block'
   pollTimer = setInterval(async () => {
     try {
-      const res = await fetch('/status')
-      const data = await res.json()
-      setStatus(data.status, data.message)
-      if (data.status === 'success' || data.status === 'failed') {
+      const [statusRes, logRes] = await Promise.all([fetch('/status'), fetch('/log')])
+      const statusData = await statusRes.json()
+      const logData = await logRes.json()
+      setStatus(statusData.status, statusData.message)
+      renderLog(logData.lines || [])
+      if (statusData.status === 'success' || statusData.status === 'failed') {
         clearInterval(pollTimer)
         document.getElementById('analyzeBtn').disabled = false
-        if (data.status === 'success') loadArtifacts()
+        if (statusData.status === 'success') loadArtifacts()
       }
     } catch {}
-  }, 1200)
+  }, 800)
+}
+
+function renderLog(lines) {
+  const box = document.getElementById('logBox')
+  box.innerHTML = lines.map(line => {
+    if (line.startsWith('✓')) return \`<span class="ok">\${esc(line)}</span>\`
+    if (line.startsWith('✗') || line.includes('⚠')) return \`<span class="err">\${esc(line)}</span>\`
+    if (line.startsWith('═')) return \`<span class="head">\${esc(line)}</span>\`
+    return esc(line)
+  }).join('\n')
+  box.scrollTop = box.scrollHeight
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
 
 async function loadArtifacts() {
@@ -190,7 +224,18 @@ fetch('/status').then(r => r.json()).then(d => {
 `
 const requestPath = path.join(root, "orchestrator", "input", "reference-request.json")
 
+const PIPELINE_STEPS = [
+  { label: "Analyzing reference URL",   script: "orchestrator/scripts/build-analyze-reference.mjs" },
+  { label: "Normalizing design tokens", script: "orchestrator/scripts/build-tokens.mjs" },
+  { label: "Generating sections",       script: "orchestrator/scripts/build-site-map.mjs" },
+  { label: "Classifying motion",        script: "orchestrator/scripts/build-motion.mjs" },
+  { label: "Building motion files",     script: "orchestrator/scripts/build-motion-files.mjs" },
+  { label: "Generating placements",     script: "orchestrator/scripts/generate-placements.mjs" },
+  { label: "Running QA",                script: "orchestrator/scripts/build-qa.mjs" },
+]
+
 let childProcess = null
+let logLines = []
 let artifacts = {
   sections: [],
   motion: [],
@@ -204,6 +249,11 @@ let state = {
   lastRequestAt: null,
   lastCompletedAt: null,
   lastErrorAt: null
+}
+
+const appendLog = (line) => {
+  logLines.push(line)
+  if (logLines.length > 500) logLines = logLines.slice(-500)
 }
 
 const sendJson = (res, statusCode, payload, origin = "*") => {
@@ -320,6 +370,37 @@ const isAllowedReadPath = (requestedFile) => {
   }
 }
 
+const runStep = (step) =>
+  new Promise((resolve, reject) => {
+    appendLog(`\n▶ ${step.label}`)
+    const proc = spawn("node", [path.join(root, step.script)], {
+      cwd: root,
+      stdio: ["ignore", "pipe", "pipe"]
+    })
+    childProcess = proc
+
+    proc.stdout.on("data", (d) => {
+      for (const line of d.toString().split("\n")) {
+        if (line.trim()) appendLog("  " + line)
+      }
+    })
+    proc.stderr.on("data", (d) => {
+      for (const line of d.toString().split("\n")) {
+        if (line.trim()) appendLog("  ⚠ " + line)
+      }
+    })
+    proc.on("exit", (code) => {
+      childProcess = null
+      if (code === 0) {
+        appendLog(`✓ ${step.label}`)
+        resolve()
+      } else {
+        appendLog(`✗ ${step.label} (exit ${code})`)
+        reject(new Error(`${step.label} failed (exit ${code})`))
+      }
+    })
+  })
+
 const launchPipeline = () => {
   if (childProcess) {
     state.status = "running"
@@ -328,28 +409,33 @@ const launchPipeline = () => {
   }
 
   state.status = "running"
-  state.message = "Pipeline running"
+  state.message = "Analyzing reference URL…"
   state.lastRequestAt = new Date().toISOString()
+  logLines = []
+  appendLog("═══ Frameflow pipeline started ═══")
 
-  childProcess = spawn("npm", ["run", "launch:frameflow"], {
-    cwd: root,
-    stdio: "inherit",
-    shell: true
-  })
+  const runAll = async () => {
+    for (const step of PIPELINE_STEPS) {
+      state.message = step.label + "…"
+      await runStep(step)
+    }
+  }
 
-  childProcess.on("exit", (code) => {
-    if (code === 0) {
+  runAll()
+    .then(() => {
       collectArtifacts()
       state.status = "success"
-      state.message = "Pipeline completed successfully"
+      state.message = "Done — components ready"
       state.lastCompletedAt = new Date().toISOString()
-    } else {
+      appendLog("\n═══ Pipeline complete ═══")
+    })
+    .catch((err) => {
       state.status = "failed"
-      state.message = `Pipeline failed with code ${code}`
+      state.message = err.message
       state.lastErrorAt = new Date().toISOString()
-    }
-    childProcess = null
-  })
+      appendLog("\n═══ Pipeline failed ═══")
+      childProcess = null
+    })
 }
 
 collectArtifacts()
@@ -376,6 +462,11 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "GET" && url.pathname === "/status") {
     sendJson(res, 200, { ok: true, ...state }, origin)
+    return
+  }
+
+  if (req.method === "GET" && url.pathname === "/log") {
+    sendJson(res, 200, { ok: true, lines: logLines }, origin)
     return
   }
 
