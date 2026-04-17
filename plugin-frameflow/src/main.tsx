@@ -9,6 +9,7 @@ import {
   insertPlacement,
   readGeneratedFile,
   sendRequestToLocalReceiver,
+  updatePlacementModuleUrl,
   type PlacementItem,
   type ReceiverArtifacts,
   type ReceiverStatus,
@@ -41,6 +42,7 @@ function App() {
   const [readinessFilter, setReadinessFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [urlDraft, setUrlDraft] = useState<Record<string, string>>({})
 
   const providerHint = useMemo(() => {
     if (provider === "claude-subscription") {
@@ -159,6 +161,25 @@ function App() {
       setStatus(`${item.name} inserted on canvas.`)
     } catch {
       setStatus(`Could not insert ${item.name}. Check module URL in Framer.`)
+    }
+  }
+
+  async function handleSaveUrl(item: PlacementItem) {
+    const moduleUrl = (urlDraft[item.id] ?? item.moduleUrl ?? "").trim()
+    setStatus(`Saving URL for ${item.name}…`)
+    try {
+      const result = await updatePlacementModuleUrl(item.id, moduleUrl)
+      setPlacements((prev) =>
+        prev.map((p) => (p.id === item.id ? { ...p, ...result.placement } : p))
+      )
+      setUrlDraft((prev) => {
+        const next = { ...prev }
+        delete next[item.id]
+        return next
+      })
+      setStatus(`Module URL saved for ${item.name}.`)
+    } catch {
+      setStatus(`Could not save URL for ${item.name}. Is the receiver running?`)
     }
   }
 
@@ -594,41 +615,96 @@ function App() {
                         Updated: {formatDate(item.updatedAt)}
                       </div>
 
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button
-                          disabled={!canInsert}
-                          onClick={() => handleInsert(item)}
-                          style={{
-                            padding: "8px 10px",
-                            borderRadius: 10,
-                            border: "none",
-                            background: canInsert ? "#111" : "#d8d8d8",
-                            color: canInsert ? "#fff" : "#666",
-                            cursor: canInsert ? "pointer" : "not-allowed",
-                            fontSize: 12,
-                            fontWeight: 600
-                          }}
-                        >
-                          Insert
-                        </button>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          <span style={{ fontSize: 11, opacity: 0.7 }}>Module URL</span>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <input
+                              value={urlDraft[item.id] ?? item.moduleUrl ?? ""}
+                              onChange={(e) =>
+                                setUrlDraft((prev) => ({ ...prev, [item.id]: e.target.value }))
+                              }
+                              placeholder="https://framer.com/m/…"
+                              style={{
+                                flex: 1,
+                                padding: "6px 8px",
+                                borderRadius: 8,
+                                border: "1px solid rgba(0,0,0,0.12)",
+                                fontSize: 11,
+                                minWidth: 0
+                              }}
+                            />
+                            <button
+                              onClick={() => handleSaveUrl(item)}
+                              disabled={
+                                (urlDraft[item.id] ?? item.moduleUrl ?? "").trim() ===
+                                (item.moduleUrl ?? "").trim()
+                              }
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: 8,
+                                border: "none",
+                                background:
+                                  (urlDraft[item.id] ?? item.moduleUrl ?? "").trim() !==
+                                  (item.moduleUrl ?? "").trim()
+                                    ? "#111"
+                                    : "#d8d8d8",
+                                color:
+                                  (urlDraft[item.id] ?? item.moduleUrl ?? "").trim() !==
+                                  (item.moduleUrl ?? "").trim()
+                                    ? "#fff"
+                                    : "#666",
+                                cursor:
+                                  (urlDraft[item.id] ?? item.moduleUrl ?? "").trim() !==
+                                  (item.moduleUrl ?? "").trim()
+                                    ? "pointer"
+                                    : "not-allowed",
+                                fontSize: 11,
+                                fontWeight: 600,
+                                whiteSpace: "nowrap"
+                              }}
+                            >
+                              Save
+                            </button>
+                          </div>
+                        </label>
 
-                        {(item.sourceFile || item.generatedFile) && (
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                           <button
-                            onClick={() => handleRead(item.sourceFile || item.generatedFile || "")}
+                            disabled={!canInsert}
+                            onClick={() => handleInsert(item)}
                             style={{
                               padding: "8px 10px",
                               borderRadius: 10,
-                              border: "1px solid rgba(0,0,0,0.12)",
-                              background: "#fff",
-                              color: "#111",
-                              cursor: "pointer",
+                              border: "none",
+                              background: canInsert ? "#111" : "#d8d8d8",
+                              color: canInsert ? "#fff" : "#666",
+                              cursor: canInsert ? "pointer" : "not-allowed",
                               fontSize: 12,
                               fontWeight: 600
                             }}
                           >
-                            Preview source
+                            Insert
                           </button>
-                        )}
+
+                          {(item.sourceFile || item.generatedFile) && (
+                            <button
+                              onClick={() => handleRead(item.sourceFile || item.generatedFile || "")}
+                              style={{
+                                padding: "8px 10px",
+                                borderRadius: 10,
+                                border: "1px solid rgba(0,0,0,0.12)",
+                                background: "#fff",
+                                color: "#111",
+                                cursor: "pointer",
+                                fontSize: 12,
+                                fontWeight: 600
+                              }}
+                            >
+                              Preview source
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )

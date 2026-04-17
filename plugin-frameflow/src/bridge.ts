@@ -102,6 +102,19 @@ export async function readGeneratedFile(file: string): Promise<ReadResponse> {
   return response.json()
 }
 
+export async function updatePlacementModuleUrl(
+  id: string,
+  moduleUrl: string
+): Promise<{ ok?: boolean; placement: PlacementItem }> {
+  const response = await fetch("http://127.0.0.1:4317/placements/update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, moduleUrl })
+  })
+  if (!response.ok) throw new Error(`Update error: ${response.status}`)
+  return response.json()
+}
+
 export async function insertPlacement(item: PlacementItem) {
   return framer.addComponentInstance({
     url: item.moduleUrl,

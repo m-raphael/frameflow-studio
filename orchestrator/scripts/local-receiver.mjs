@@ -222,6 +222,46 @@ const server = http.createServer((req, res) => {
     return
   }
 
+  if (req.method === "POST" && url.pathname === "/placements/update") {
+    let body = ""
+    req.on("data", (chunk) => { body += chunk })
+    req.on("end", () => {
+      try {
+        const { id, moduleUrl } = JSON.parse(body)
+
+        if (!id || typeof id !== "string") {
+          sendJson(res, 400, { ok: false, message: "Missing or invalid placement id" }, origin)
+          return
+        }
+
+        if (typeof moduleUrl !== "string") {
+          sendJson(res, 400, { ok: false, message: "Missing moduleUrl" }, origin)
+          return
+        }
+
+        const placementsPath = path.join(root, "framer", "generated", "placements.json")
+        const existing = safeReadJson("framer/generated/placements.json") || { sections: [] }
+        const sections = Array.isArray(existing.sections) ? existing.sections : []
+
+        const idx = sections.findIndex((s) => s.id === id)
+        if (idx === -1) {
+          sendJson(res, 404, { ok: false, message: `Placement not found: ${id}` }, origin)
+          return
+        }
+
+        sections[idx] = { ...sections[idx], moduleUrl: moduleUrl.trim() }
+        fs.writeFileSync(placementsPath, JSON.stringify({ sections }, null, 2) + "\n", "utf8")
+
+        collectArtifacts()
+        const updated = artifacts.placements.find((p) => p.id === id) || sections[idx]
+        sendJson(res, 200, { ok: true, placement: updated }, origin)
+      } catch {
+        sendJson(res, 400, { ok: false, message: "Invalid JSON payload" }, origin)
+      }
+    })
+    return
+  }
+
   if (req.method === "POST" && url.pathname === "/request") {
     let body = ""
     req.on("data", (chunk) => { body += chunk })
